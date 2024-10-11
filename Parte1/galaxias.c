@@ -11,6 +11,8 @@
 Galaxia* galaxias = NULL;
 int combustible = 0;
 char* ubicacion_nave = NULL;
+int modo_viaje = 0; // Por defecto, 0 (autónomo)
+
 
 // Implementación de las funciones
 

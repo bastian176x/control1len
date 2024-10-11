@@ -18,6 +18,8 @@ typedef struct Galaxia {
 extern Galaxia* galaxias;  // Lista de galaxias
 extern int combustible;    // Combustible de la nave
 extern char* ubicacion_nave; // Ubicación actual de la nave
+extern int modo_viaje; // 0 para autónomo, 1 para guiado
+
 
 // Declaración de las funciones
 Galaxia* agregarGalaxia(Galaxia* lista, char* nombre);

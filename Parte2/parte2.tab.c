@@ -76,7 +76,7 @@
 
 void cargarGalaxia(char* nombre);
 void cargarArista(char* origen, char* destino, int peso);
-void cargarNave(int combustible, char* ubicacion);
+void cargarNave(char* nombre, int combust, char* ubicacion);
 
 int yylex();
 
@@ -88,19 +88,23 @@ void cargarArista(char* origen, char* destino, int peso) {
     agregarArista(buscarGalaxia(galaxias, origen), destino, peso);
 }
 
-void cargarNave(int combust, char* ubicacion) {
-    combustible = combust;  // Asigna directamente el valor a la variable global
+void cargarNave(char* nombre, int combust, char* ubicacion) {
+    combustible = combust;
     if (ubicacion_nave != NULL) {
-        free(ubicacion_nave);  // Libera la memoria previa si la variable ya tenía un valor
+        free(ubicacion_nave);
     }
-    ubicacion_nave = strdup(ubicacion);  // Duplica el valor de la ubicación para asignarlo correctamente
+    ubicacion_nave = strdup(ubicacion);
+    // El modo de viaje se establecerá más adelante
+    printf("Nave '%s' creada con %d unidades de combustible en la galaxia '%s'\n",
+           nombre, combustible, ubicacion_nave);
 }
+
 
 void yyerror(const char* s) {
     fprintf(stderr, "Error de sintaxis: %s\n", s);
 }
 
-#line 104 "parte2.tab.c"
+#line 108 "parte2.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -135,16 +139,18 @@ enum yysymbol_kind_t
   YYSYMBOL_ARISTA = 4,                     /* ARISTA  */
   YYSYMBOL_NAVE = 5,                       /* NAVE  */
   YYSYMBOL_REABASTECER = 6,                /* REABASTECER  */
-  YYSYMBOL_IDENTIFICADOR = 7,              /* IDENTIFICADOR  */
-  YYSYMBOL_NUMERO = 8,                     /* NUMERO  */
-  YYSYMBOL_YYACCEPT = 9,                   /* $accept  */
-  YYSYMBOL_inicio = 10,                    /* inicio  */
-  YYSYMBOL_lista_galaxias = 11,            /* lista_galaxias  */
-  YYSYMBOL_galaxia = 12,                   /* galaxia  */
-  YYSYMBOL_13_1 = 13,                      /* $@1  */
-  YYSYMBOL_lista_aristas = 14,             /* lista_aristas  */
-  YYSYMBOL_arista = 15,                    /* arista  */
-  YYSYMBOL_nave = 16                       /* nave  */
+  YYSYMBOL_AUTONOMO = 7,                   /* AUTONOMO  */
+  YYSYMBOL_GUIADO = 8,                     /* GUIADO  */
+  YYSYMBOL_IDENTIFICADOR = 9,              /* IDENTIFICADOR  */
+  YYSYMBOL_NUMERO = 10,                    /* NUMERO  */
+  YYSYMBOL_YYACCEPT = 11,                  /* $accept  */
+  YYSYMBOL_inicio = 12,                    /* inicio  */
+  YYSYMBOL_lista_galaxias = 13,            /* lista_galaxias  */
+  YYSYMBOL_galaxia = 14,                   /* galaxia  */
+  YYSYMBOL_15_1 = 15,                      /* $@1  */
+  YYSYMBOL_lista_aristas = 16,             /* lista_aristas  */
+  YYSYMBOL_arista = 17,                    /* arista  */
+  YYSYMBOL_nave = 18                       /* nave  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -475,7 +481,7 @@ union yyalloc
 #define YYLAST   15
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  9
+#define YYNTOKENS  11
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  8
 /* YYNRULES -- Number of rules.  */
@@ -484,7 +490,7 @@ union yyalloc
 #define YYNSTATES  22
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   263
+#define YYMAXUTOK   265
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -524,15 +530,15 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8
+       5,     6,     7,     8,     9,    10
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    46,    46,    50,    51,    55,    55,    60,    61,    65,
-      69
+       0,    52,    52,    56,    57,    61,    61,    66,    67,    71,
+      75
 };
 #endif
 
@@ -549,8 +555,9 @@ static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
 static const char *const yytname[] =
 {
   "\"end of file\"", "error", "\"invalid token\"", "GALAXIA", "ARISTA",
-  "NAVE", "REABASTECER", "IDENTIFICADOR", "NUMERO", "$accept", "inicio",
-  "lista_galaxias", "galaxia", "$@1", "lista_aristas", "arista", "nave", YY_NULLPTR
+  "NAVE", "REABASTECER", "AUTONOMO", "GUIADO", "IDENTIFICADOR", "NUMERO",
+  "$accept", "inicio", "lista_galaxias", "galaxia", "$@1", "lista_aristas",
+  "arista", "nave", YY_NULLPTR
 };
 
 static const char *
@@ -560,7 +567,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-10)
+#define YYPACT_NINF (-9)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -574,9 +581,9 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -3,    -6,     2,    -2,    -3,   -10,   -10,    -1,   -10,   -10,
-       0,     1,     3,   -10,     0,     4,     5,   -10,     7,     6,
-     -10,   -10
+      -3,    -8,     2,    -2,    -3,    -9,    -9,    -5,    -9,    -9,
+       1,    -4,    -1,    -9,     1,     0,     3,    -9,     4,     5,
+      -9,    -9
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -592,7 +599,7 @@ static const yytype_int8 yydefact[] =
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -10,   -10,    11,   -10,   -10,    -9,   -10,   -10
+      -9,    -9,     7,    -9,    -9,    -7,    -9,    -9
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
@@ -606,30 +613,30 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-       1,     5,     6,     7,    12,    17,    11,     0,     0,    15,
-      16,    18,    19,    20,    21,     9
+       1,     5,     6,     7,    11,    12,    15,    17,    16,    18,
+      20,     9,    19,     0,     0,    21
 };
 
 static const yytype_int8 yycheck[] =
 {
-       3,     7,     0,     5,     4,    14,     7,    -1,    -1,     8,
-       7,     7,     7,     6,     8,     4
+       3,     9,     0,     5,     9,     4,    10,    14,     9,     9,
+       6,     4,     9,    -1,    -1,    10
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
    state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,     3,    10,    11,    12,     7,     0,     5,    16,    11,
-      13,     7,     4,    14,    15,     8,     7,    14,     7,     7,
-       6,     8
+       0,     3,    12,    13,    14,     9,     0,     5,    18,    13,
+      15,     9,     4,    16,    17,    10,     9,    16,     9,     9,
+       6,    10
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,     9,    10,    11,    11,    13,    12,    14,    14,    15,
-      16
+       0,    11,    12,    13,    13,    15,    14,    16,    16,    17,
+      18
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
@@ -1100,25 +1107,25 @@ yyreduce:
   switch (yyn)
     {
   case 5: /* $@1: %empty  */
-#line 55 "parte2.y"
+#line 61 "parte2.y"
                           { cargarGalaxia((yyvsp[0].strval)); }
-#line 1106 "parte2.tab.c"
+#line 1113 "parte2.tab.c"
     break;
 
   case 9: /* arista: ARISTA IDENTIFICADOR IDENTIFICADOR NUMERO  */
-#line 65 "parte2.y"
+#line 71 "parte2.y"
                                               { cargarArista((yyvsp[-2].strval), (yyvsp[-1].strval), (yyvsp[0].intval)); }
-#line 1112 "parte2.tab.c"
+#line 1119 "parte2.tab.c"
     break;
 
   case 10: /* nave: NAVE IDENTIFICADOR NUMERO IDENTIFICADOR REABASTECER  */
-#line 69 "parte2.y"
-                                                        { cargarNave((yyvsp[-2].intval), (yyvsp[-3].strval)); }
-#line 1118 "parte2.tab.c"
+#line 75 "parte2.y"
+                                                        { cargarNave((yyvsp[-3].strval), (yyvsp[-2].intval), (yyvsp[-1].strval)); }
+#line 1125 "parte2.tab.c"
     break;
 
 
-#line 1122 "parte2.tab.c"
+#line 1129 "parte2.tab.c"
 
       default: break;
     }
@@ -1311,5 +1318,5 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 71 "parte2.y"
+#line 84 "parte2.y"
 

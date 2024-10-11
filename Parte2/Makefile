@@ -1,3 +1,3 @@
-flex parte2.l
 bison -d parte2.y
-gcc -o dijkstra parser.tab.c lex.yy.c galaxias.c
+flex parte2.l
+gcc -o dijkstra lex.yy.c parte2.tab.c dijkstra.c ../Parte1/galaxias.c ../utils/utils.

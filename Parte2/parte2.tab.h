@@ -58,8 +58,10 @@ extern int yydebug;
     ARISTA = 259,                  /* ARISTA  */
     NAVE = 260,                    /* NAVE  */
     REABASTECER = 261,             /* REABASTECER  */
-    IDENTIFICADOR = 262,           /* IDENTIFICADOR  */
-    NUMERO = 263                   /* NUMERO  */
+    AUTONOMO = 262,                /* AUTONOMO  */
+    GUIADO = 263,                  /* GUIADO  */
+    IDENTIFICADOR = 264,           /* IDENTIFICADOR  */
+    NUMERO = 265                   /* NUMERO  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -68,12 +70,12 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 34 "parte2.y"
+#line 38 "parte2.y"
 
     int intval;
     char* strval;
 
-#line 77 "parte2.tab.h"
+#line 79 "parte2.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

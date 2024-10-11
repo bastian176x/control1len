@@ -5,11 +5,12 @@
 
 %%
 
-"galaxia "                { return GALAXIA; }  // Coincide con 'galaxia ' (el espacio es parte del token)
-"arista "                 { return ARISTA; }   // Coincide con 'arista '
-"nave "                   { return NAVE; }     // Coincide con 'nave '
+"galaxia"                { return GALAXIA; }  
+"arista"                 { return ARISTA; }   
+"nave"                   { return NAVE; }     
 "reabastecer"          { return REABASTECER; }
-
+"autonomo"             { return AUTONOMO; }
+"guiado"               { return GUIADO; }
 
 [0-9]+                    { yylval.intval = atoi(yytext); return NUMERO; }  // Coincide con números
 [a-zA-Z0-9_]+             { yylval.strval = strdup(yytext); return IDENTIFICADOR; }  // Coincide con identificadores (galaxias, ubicaciones)

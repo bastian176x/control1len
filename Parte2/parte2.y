@@ -6,7 +6,7 @@
 
 void cargarGalaxia(char* nombre);
 void cargarArista(char* origen, char* destino, int peso);
-void cargarNave(int combustible, char* ubicacion);
+void cargarNave(char* nombre, int combust, char* ubicacion);
 
 int yylex();
 
@@ -18,13 +18,17 @@ void cargarArista(char* origen, char* destino, int peso) {
     agregarArista(buscarGalaxia(galaxias, origen), destino, peso);
 }
 
-void cargarNave(int combust, char* ubicacion) {
-    combustible = combust;  // Asigna directamente el valor a la variable global
+void cargarNave(char* nombre, int combust, char* ubicacion) {
+    combustible = combust;
     if (ubicacion_nave != NULL) {
-        free(ubicacion_nave);  // Libera la memoria previa si la variable ya tenía un valor
+        free(ubicacion_nave);
     }
-    ubicacion_nave = strdup(ubicacion);  // Duplica el valor de la ubicación para asignarlo correctamente
+    ubicacion_nave = strdup(ubicacion);
+    // El modo de viaje se establecerá más adelante
+    printf("Nave '%s' creada con %d unidades de combustible en la galaxia '%s'\n",
+           nombre, combustible, ubicacion_nave);
 }
+
 
 void yyerror(const char* s) {
     fprintf(stderr, "Error de sintaxis: %s\n", s);
@@ -36,9 +40,11 @@ void yyerror(const char* s) {
     char* strval;
 }
 
-%token GALAXIA ARISTA NAVE REABASTECER
+%token GALAXIA ARISTA NAVE REABASTECER AUTONOMO GUIADO
 %token <strval> IDENTIFICADOR
 %token <intval> NUMERO
+
+%type <intval> modo_viaje
 
 %%
 
@@ -66,6 +72,13 @@ arista:
 ;
 
 nave:
-    NAVE IDENTIFICADOR NUMERO IDENTIFICADOR REABASTECER { cargarNave($3, $2); }
+    NAVE IDENTIFICADOR NUMERO IDENTIFICADOR REABASTECER { cargarNave($2, $3, $4); }
 ;
+
+
+modo_viaje:
+    AUTONOMO { $$ = 0; }
+    | GUIADO { $$ = 1; }
+;
+
 %%
