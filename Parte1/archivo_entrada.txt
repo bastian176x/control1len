@@ -1,0 +1,65 @@
+galaxia H;
+galaxia G;
+galaxia F;
+galaxia E;
+galaxia D;
+galaxia C;
+galaxia B;
+galaxia A;
+galaxia I;   
+galaxia I1;  
+galaxia I2;  
+galaxia A1;  
+galaxia A2;  
+galaxia A3;  
+galaxia E1;  
+
+arista A1, A = peso = 3;
+arista A2, A = peso = 1;
+arista A3, A = peso = 2;
+arista A, D = peso = 7;
+arista A, B = peso = 18;
+arista A, E1 = peso = 25;
+
+arista B, D = peso = 23;
+arista B, E = peso = 21;
+arista B, C = peso = 21;
+
+arista C, F = peso = 13;
+
+arista D, H = peso = 12;
+arista D, G = peso = 11;
+
+arista E, E1 = peso = 8;
+arista E, G = peso = 12;
+
+arista F, G = peso = 19;
+
+arista G, H = peso = 16;
+arista G, I = peso = 8;
+
+arista H, I = peso = 12;
+
+arista I, I1 = peso = 6;
+arista I, I2 = peso = 8;  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+nave Enterprise, combustible = 1000, I1, reabastecer;
