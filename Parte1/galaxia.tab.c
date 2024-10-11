@@ -100,7 +100,7 @@ Galaxia* buscarGalaxia(Galaxia* lista, char* nombre);
 Galaxia* agregarGalaxia(Galaxia* lista, char* nombre);
 void agregarArista(Galaxia* galaxia, char* destino, int peso);
 
-// Implementación de las funciones del grafo (igual que antes)
+// Implementación de las funciones del grafo
 Galaxia* buscarGalaxia(Galaxia* lista, char* nombre) {
     Galaxia* actual = lista;
     while (actual != NULL) {
@@ -142,7 +142,30 @@ void agregarArista(Galaxia* galaxia, char* destino, int peso) {
     printf("Arista agregada de %s a %s con peso %d\n", destino, galaxia->nombre, peso);
 }
 
-#line 146 "galaxia.tab.c"
+// Función para guardar datos en un archivo
+void guardarDatos(const char* nombreArchivo) {
+    FILE *archivo = fopen(nombreArchivo, "w");
+    if (!archivo) {
+        perror("Error al abrir archivo para guardar datos");
+        return;
+    }
+
+    Galaxia* actualGalaxia = galaxias;
+    while (actualGalaxia != NULL) {
+        fprintf(archivo, "Galaxia: %s\n", actualGalaxia->nombre);
+        Arista* actualArista = actualGalaxia->adyacencias;
+        while (actualArista != NULL) {
+            fprintf(archivo, "  Arista hacia: %s, Peso: %d\n", actualArista->destino, actualArista->peso);
+            actualArista = actualArista->siguiente;
+        }
+        actualGalaxia = actualGalaxia->siguiente;
+    }
+
+    fprintf(archivo, "Nave: Combustible: %d, Ubicación: %s\n", combustible, ubicacion_nave);
+    fclose(archivo);
+}
+
+#line 169 "galaxia.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -582,8 +605,8 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    93,    93,    97,    98,    99,   100,   101,   102,   106,
-     115,   124,   137
+       0,   114,   114,   118,   119,   120,   121,   122,   123,   127,
+     136,   145,   158
 };
 #endif
 
@@ -1158,27 +1181,27 @@ yyreduce:
   switch (yyn)
     {
   case 9: /* definicion_galaxia: GALAXIA IDENTIFICADOR PUNTOYCOMA  */
-#line 107 "galaxia.y"
+#line 128 "galaxia.y"
     {
         if(buscarGalaxia(galaxias,(yyvsp[-1].str)) == NULL){
             galaxias = agregarGalaxia(galaxias,(yyvsp[-1].str));
         }
     }
-#line 1168 "galaxia.tab.c"
+#line 1191 "galaxia.tab.c"
     break;
 
   case 10: /* definicion_nave: NAVE IDENTIFICADOR COMA COMBUSTIBLE IGUAL NUMERO COMA ubicacion COMA REABASTECER PUNTOYCOMA  */
-#line 116 "galaxia.y"
+#line 137 "galaxia.y"
     {
         combustible = (yyvsp[-5].numero);
         ubicacion_nave = strdup((yyvsp[-3].str));
         printf("Nave '%s' creada con %d unidades de combustible en la galaxia '%s'\n", (yyvsp[-9].str), combustible, ubicacion_nave);
     }
-#line 1178 "galaxia.tab.c"
+#line 1201 "galaxia.tab.c"
     break;
 
   case 11: /* definicion_arista: ARISTA IDENTIFICADOR COMA IDENTIFICADOR IGUAL PESO IGUAL NUMERO PUNTOYCOMA  */
-#line 125 "galaxia.y"
+#line 146 "galaxia.y"
     {
         Galaxia* origen = buscarGalaxia(galaxias,(yyvsp[-7].str));
         Galaxia* destino = buscarGalaxia(galaxias, (yyvsp[-5].str));
@@ -1188,19 +1211,19 @@ yyreduce:
             printf("Error: Las galaxias %s o %s no existen.\n", (yyvsp[-7].str), (yyvsp[-5].str));
         }
     }
-#line 1192 "galaxia.tab.c"
+#line 1215 "galaxia.tab.c"
     break;
 
   case 12: /* ubicacion: IDENTIFICADOR  */
-#line 138 "galaxia.y"
+#line 159 "galaxia.y"
     {
         (yyval.str) = (yyvsp[0].str);
     }
-#line 1200 "galaxia.tab.c"
+#line 1223 "galaxia.tab.c"
     break;
 
 
-#line 1204 "galaxia.tab.c"
+#line 1227 "galaxia.tab.c"
 
       default: break;
     }
@@ -1393,7 +1416,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 143 "galaxia.y"
+#line 164 "galaxia.y"
 
 
 void yyerror(const char *s) {
@@ -1410,6 +1433,6 @@ int main(int argc, char **argv) {
         yyin = archivo;
     }
     yyparse();
-    // Aquí puedes llamar a Dijkstra si fuera necesario
+    guardarDatos("salida.txt");
     return 0;
 }

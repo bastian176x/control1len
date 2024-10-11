@@ -30,7 +30,7 @@ Galaxia* buscarGalaxia(Galaxia* lista, char* nombre);
 Galaxia* agregarGalaxia(Galaxia* lista, char* nombre);
 void agregarArista(Galaxia* galaxia, char* destino, int peso);
 
-// Implementación de las funciones del grafo (igual que antes)
+// Implementación de las funciones del grafo
 Galaxia* buscarGalaxia(Galaxia* lista, char* nombre) {
     Galaxia* actual = lista;
     while (actual != NULL) {
@@ -71,9 +71,30 @@ void agregarArista(Galaxia* galaxia, char* destino, int peso) {
     printf("Arista agregada de %s a %s con peso %d\n", galaxia->nombre, destino, peso);
     printf("Arista agregada de %s a %s con peso %d\n", destino, galaxia->nombre, peso);
 }
+
+// Función para guardar datos en un archivo
+void guardarDatos(const char* nombreArchivo) {
+    FILE *archivo = fopen(nombreArchivo, "w");
+    if (!archivo) {
+        perror("Error al abrir archivo para guardar datos");
+        return;
+    }
+
+    Galaxia* actualGalaxia = galaxias;
+    while (actualGalaxia != NULL) {
+        fprintf(archivo, "Galaxia: %s\n", actualGalaxia->nombre);
+        Arista* actualArista = actualGalaxia->adyacencias;
+        while (actualArista != NULL) {
+            fprintf(archivo, "  Arista hacia: %s, Peso: %d\n", actualArista->destino, actualArista->peso);
+            actualArista = actualArista->siguiente;
+        }
+        actualGalaxia = actualGalaxia->siguiente;
+    }
+
+    fprintf(archivo, "Nave: Combustible: %d, Ubicación: %s\n", combustible, ubicacion_nave);
+    fclose(archivo);
+}
 %}
-
-
 
 %union {
     int numero;
@@ -156,6 +177,6 @@ int main(int argc, char **argv) {
         yyin = archivo;
     }
     yyparse();
-    // Aquí puedes llamar a Dijkstra si fuera necesario
+    guardarDatos("salida.txt");
     return 0;
 }
