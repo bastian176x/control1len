@@ -1,18 +1,14 @@
+// galaxias.c
+
 #include "galaxias.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>  
+#include <ctype.h>
 #include "../utils/utils.h"
 
-
-
-// Definición de variables globales
-Galaxia* galaxias = NULL;
-int combustible = 0;
-char* ubicacion_nave = NULL;
-int modo_viaje = 0; 
-
+// NO DEFINIR LAS VARIABLES GLOBALES AQUÍ
+// Las variables globales están definidas en dijkstra.c y declaradas como extern en galaxias.h
 
 // Implementación de las funciones
 
@@ -25,15 +21,11 @@ Galaxia* agregarGalaxia(Galaxia* lista, char* nombre) {
     nueva->nombre = strdup(nombre);
     nueva->adyacencias = NULL;
     nueva->siguiente = lista;
-    printf("Galaxia '%s' agregada correctamente.\n", nombre);  
+    printf("Galaxia '%s' agregada correctamente.\n", nombre);
     return nueva;
 }
 
-
-
-
 Galaxia* buscarGalaxia(Galaxia* lista, char* nombre) {
-    
     Galaxia* actual = lista;
     while (actual != NULL) {
         if (strcmp(actual->nombre, nombre) == 0) {
@@ -44,20 +36,19 @@ Galaxia* buscarGalaxia(Galaxia* lista, char* nombre) {
     return NULL;
 }
 
-
 void agregarArista(Galaxia* galaxia, char* destino, int peso) {
     if (galaxia == NULL || destino == NULL) {
         printf("Error: Galaxia o destino nulo en agregarArista\n");
         return;
     }
     trimWhitespace(destino);
-    
+
     Galaxia* destinoGalaxia = buscarGalaxia(galaxias, destino);
     if (destinoGalaxia == NULL) {
         printf("Error: No se puede agregar arista porque la galaxia destino %s no fue encontrada.\n", destino);
         return;
     }
-    
+
     printf("Agregando arista de %s a %s con peso %d\n", galaxia->nombre, destino, peso);
 
     Arista* nueva = (Arista*)malloc(sizeof(Arista));
@@ -82,9 +73,6 @@ void agregarArista(Galaxia* galaxia, char* destino, int peso) {
     aristaInversa->siguiente = destinoGalaxia->adyacencias;
     destinoGalaxia->adyacencias = aristaInversa;
 }
-
-
-
 
 void guardarDatos(const char* nombreArchivo) {
     FILE* archivo = fopen(nombreArchivo, "w");
@@ -119,10 +107,6 @@ void guardarDatos(const char* nombreArchivo) {
 
     fclose(archivo);
 }
-
-
-
-
 
 void modificarPesoArista(Galaxia* galaxias) {
     char confirmacion;
@@ -159,6 +143,6 @@ void modificarPesoArista(Galaxia* galaxias) {
         }
         printf("La arista entre %s y %s no existe.\n", origen, destino);
     } else {
-        printf("Modificacion cancelada.\n");
+        printf("Modificación cancelada.\n");
     }
 }

@@ -62,4 +62,4 @@ arista I, I2 = peso = 8;
 
 
 
-nave Enterprise, combustible = 1000, I1, reabastecer;
+nave Enterprise, combustible = 15, I1, reabastecer;

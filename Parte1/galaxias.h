@@ -14,12 +14,11 @@ typedef struct Galaxia {
     struct Galaxia* siguiente;
 } Galaxia;
 
-// Variables globales
+// Variables globales declaradas como extern
 extern Galaxia* galaxias;  
 extern int combustible;    
 extern char* ubicacion_nave; 
 extern int modo_viaje; 
-
 
 // Declaración de las funciones
 Galaxia* agregarGalaxia(Galaxia* lista, char* nombre);
