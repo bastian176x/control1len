@@ -165,7 +165,49 @@ void guardarDatos(const char* nombreArchivo) {
     fclose(archivo);
 }
 
-#line 169 "galaxia.tab.c"
+void modificarPesoArista(Galaxia* galaxias) {
+    char confirmacion;
+    char origen[100];
+    char destino[100];
+    int nuevoPeso;
+
+    printf("¿Desea modificar el peso de alguna arista? (s/n): ");
+    scanf(" %c", &confirmacion);
+
+    if (confirmacion == 's' || confirmacion == 'S') {
+        printf("Ingrese el nombre de la galaxia de origen (solo se permiten galaxias adyacentes): ");
+        scanf("%s", origen);
+        Galaxia* galaxiaOrigen = buscarGalaxia(galaxias, origen);
+        if (galaxiaOrigen == NULL) {
+            printf("La galaxia de origen no existe.\n");
+            return;
+        }
+
+        printf("Ingrese el nombre de la galaxia de destino (solo se permiten galaxias adyacentes): ");
+        scanf("%s", destino);
+
+        Arista* actual = galaxiaOrigen->adyacencias;
+        while (actual != NULL) {
+            if (strcmp(actual->destino, destino) == 0) {
+                printf("Se ha encontrado la arista de %s a %s con peso actual %d.\n", origen, destino, actual->peso);
+                printf("Ingrese el nuevo peso para la arista de %s a %s: ", origen, destino);
+                scanf("%d", &nuevoPeso);
+                actual->peso = nuevoPeso;
+                printf("Peso de la arista modificado exitosamente.\n");
+                return;
+            }
+            actual = actual->siguiente;
+        }
+        printf("La arista entre %s y %s no existe.\n", origen, destino);
+    } else {
+        printf("Modificación cancelada.\n");
+    }
+}
+
+
+
+
+#line 211 "galaxia.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -605,8 +647,8 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   114,   114,   118,   119,   120,   121,   122,   123,   127,
-     136,   145,   158
+       0,   156,   156,   160,   161,   162,   163,   164,   165,   169,
+     178,   187,   200
 };
 #endif
 
@@ -1181,27 +1223,27 @@ yyreduce:
   switch (yyn)
     {
   case 9: /* definicion_galaxia: GALAXIA IDENTIFICADOR PUNTOYCOMA  */
-#line 128 "galaxia.y"
+#line 170 "galaxia.y"
     {
         if(buscarGalaxia(galaxias,(yyvsp[-1].str)) == NULL){
             galaxias = agregarGalaxia(galaxias,(yyvsp[-1].str));
         }
     }
-#line 1191 "galaxia.tab.c"
+#line 1233 "galaxia.tab.c"
     break;
 
   case 10: /* definicion_nave: NAVE IDENTIFICADOR COMA COMBUSTIBLE IGUAL NUMERO COMA ubicacion COMA REABASTECER PUNTOYCOMA  */
-#line 137 "galaxia.y"
+#line 179 "galaxia.y"
     {
         combustible = (yyvsp[-5].numero);
         ubicacion_nave = strdup((yyvsp[-3].str));
         printf("Nave '%s' creada con %d unidades de combustible en la galaxia '%s'\n", (yyvsp[-9].str), combustible, ubicacion_nave);
     }
-#line 1201 "galaxia.tab.c"
+#line 1243 "galaxia.tab.c"
     break;
 
   case 11: /* definicion_arista: ARISTA IDENTIFICADOR COMA IDENTIFICADOR IGUAL PESO IGUAL NUMERO PUNTOYCOMA  */
-#line 146 "galaxia.y"
+#line 188 "galaxia.y"
     {
         Galaxia* origen = buscarGalaxia(galaxias,(yyvsp[-7].str));
         Galaxia* destino = buscarGalaxia(galaxias, (yyvsp[-5].str));
@@ -1211,19 +1253,19 @@ yyreduce:
             printf("Error: Las galaxias %s o %s no existen.\n", (yyvsp[-7].str), (yyvsp[-5].str));
         }
     }
-#line 1215 "galaxia.tab.c"
+#line 1257 "galaxia.tab.c"
     break;
 
   case 12: /* ubicacion: IDENTIFICADOR  */
-#line 159 "galaxia.y"
+#line 201 "galaxia.y"
     {
         (yyval.str) = (yyvsp[0].str);
     }
-#line 1223 "galaxia.tab.c"
+#line 1265 "galaxia.tab.c"
     break;
 
 
-#line 1227 "galaxia.tab.c"
+#line 1269 "galaxia.tab.c"
 
       default: break;
     }
@@ -1416,7 +1458,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 164 "galaxia.y"
+#line 206 "galaxia.y"
 
 
 void yyerror(const char *s) {
@@ -1433,6 +1475,7 @@ int main(int argc, char **argv) {
         yyin = archivo;
     }
     yyparse();
+    modificarPesoArista(galaxias);
     guardarDatos("salida.txt");
     return 0;
 }

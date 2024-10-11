@@ -94,6 +94,48 @@ void guardarDatos(const char* nombreArchivo) {
     fprintf(archivo, "Nave: Combustible: %d, Ubicación: %s\n", combustible, ubicacion_nave);
     fclose(archivo);
 }
+
+void modificarPesoArista(Galaxia* galaxias) {
+    char confirmacion;
+    char origen[100];
+    char destino[100];
+    int nuevoPeso;
+
+    printf("Desea modificar el peso de alguna arista? (s/n): ");
+    scanf(" %c", &confirmacion);
+
+    if (confirmacion == 's' || confirmacion == 'S') {
+        printf("Ingrese el nombre de la galaxia de origen (solo se permiten galaxias adyacentes): ");
+        scanf("%s", origen);
+        Galaxia* galaxiaOrigen = buscarGalaxia(galaxias, origen);
+        if (galaxiaOrigen == NULL) {
+            printf("La galaxia de origen no existe.\n");
+            return;
+        }
+
+        printf("Ingrese el nombre de la galaxia de destino (solo se permiten galaxias adyacentes): ");
+        scanf("%s", destino);
+
+        Arista* actual = galaxiaOrigen->adyacencias;
+        while (actual != NULL) {
+            if (strcmp(actual->destino, destino) == 0) {
+                printf("Se ha encontrado la arista de %s a %s con peso actual %d.\n", origen, destino, actual->peso);
+                printf("Ingrese el nuevo peso para la arista de %s a %s: ", origen, destino);
+                scanf("%d", &nuevoPeso);
+                actual->peso = nuevoPeso;
+                printf("Peso de la arista modificado exitosamente.\n");
+                return;
+            }
+            actual = actual->siguiente;
+        }
+        printf("La arista entre %s y %s no existe.\n", origen, destino);
+    } else {
+        printf("Modificacion cancelada.\n");
+    }
+}
+
+
+
 %}
 
 %union {
@@ -177,6 +219,7 @@ int main(int argc, char **argv) {
         yyin = archivo;
     }
     yyparse();
+    modificarPesoArista(galaxias);
     guardarDatos("salida.txt");
     return 0;
 }

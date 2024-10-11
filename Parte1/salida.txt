@@ -18,7 +18,7 @@ Galaxia: I
   Arista hacia: G, Peso: 8
 Galaxia: A
   Arista hacia: E1, Peso: 25
-  Arista hacia: B, Peso: 18
+  Arista hacia: B, Peso: 777
   Arista hacia: D, Peso: 7
   Arista hacia: A3, Peso: 2
   Arista hacia: A2, Peso: 1
