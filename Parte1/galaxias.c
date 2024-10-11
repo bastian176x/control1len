@@ -11,7 +11,7 @@
 Galaxia* galaxias = NULL;
 int combustible = 0;
 char* ubicacion_nave = NULL;
-int modo_viaje = 0; // Por defecto, 0 (autónomo)
+int modo_viaje = 0; 
 
 
 // Implementación de las funciones
@@ -25,7 +25,7 @@ Galaxia* agregarGalaxia(Galaxia* lista, char* nombre) {
     nueva->nombre = strdup(nombre);
     nueva->adyacencias = NULL;
     nueva->siguiente = lista;
-    printf("Galaxia '%s' agregada correctamente.\n", nombre);  // Depuración para confirmar adición
+    printf("Galaxia '%s' agregada correctamente.\n", nombre);  
     return nueva;
 }
 

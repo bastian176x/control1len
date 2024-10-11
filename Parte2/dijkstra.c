@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>  // Necesario para isspace
+#include <ctype.h>  
 #include "../Parte1/galaxias.h"
 #include "../utils/utils.h"
-  // Incluir el archivo de cabecera de la Parte 1
+ 
 
 #define INFINITO 999999
 
@@ -148,7 +148,7 @@ void cargarDatos(const char* nombreArchivo) {
         if (strncmp(linea, "galaxia ", 8) == 0) {
             char nombreGalaxia[100];
             sscanf(linea, "galaxia %[^;];", nombreGalaxia);
-            trimWhitespace(nombreGalaxia);  // Recortar espacios en blanco
+            trimWhitespace(nombreGalaxia);  
             if (!buscarGalaxia(galaxias, nombreGalaxia)) {
                 galaxias = agregarGalaxia(galaxias, nombreGalaxia);
             }
@@ -157,8 +157,8 @@ void cargarDatos(const char* nombreArchivo) {
             int peso;
             sscanf(linea, "arista %[^,], %[^=]= peso = %d;", origen, destino, &peso);
 
-            trimWhitespace(origen);   // Recortar espacios en blanco
-            trimWhitespace(destino);  // Recortar espacios en blanco
+            trimWhitespace(origen);   
+            trimWhitespace(destino);  
 
             Galaxia* origenGalaxia = buscarGalaxia(galaxias, origen);
             Galaxia* destinoGalaxia = buscarGalaxia(galaxias, destino);
@@ -172,8 +172,8 @@ void cargarDatos(const char* nombreArchivo) {
         } else if (strncmp(linea, "nave ", 5) == 0) {
             char nombreNave[100], ubicacion[100];
             sscanf(linea, "nave %[^,], combustible = %d, %[^,], reabastecer;", nombreNave, &combustible, ubicacion);
-            trimWhitespace(nombreNave);    // Recortar espacios en blanco
-            trimWhitespace(ubicacion);     // Recortar espacios en blanco
+            trimWhitespace(nombreNave);    
+            trimWhitespace(ubicacion);     
             ubicacion_nave = strdup(ubicacion);
         } else if (strncmp(linea, "nave ", 5) == 0) {
                 char nombreNave[100], ubicacion[100], modo[20];
@@ -218,10 +218,10 @@ Galaxia* encontrarMenorDistancia(Galaxia* lista, int* distancias, int* visitados
 }
 
 void dijkstra(Galaxia* lista, char* inicio, char* destino) {
-    int distancias[100];          // Para almacenar la distancia más corta a cada galaxia
-    int visitados[100] = {0};     // Marcar galaxias ya visitadas
-    Galaxia* predecesores[100] = {NULL}; // Para almacenar el predecesor de cada galaxia
-    Galaxia* nodos[100];          // Lista de galaxias por índice para facilitar el acceso
+    int distancias[100];          
+    int visitados[100] = {0};     
+    Galaxia* predecesores[100] = {NULL}; 
+    Galaxia* nodos[100];         
     int index = 0;
 
     // Inicializar distancias a infinito y predecesores a NULL
@@ -374,8 +374,7 @@ void dijkstra(Galaxia* lista, char* inicio, char* destino) {
         }
         printf("Combustible restante despues del viaje: %d\n", combustibleRestante);
 
-        // Actualizar el combustible global si lo deseas
-        // combustible = combustibleRestante;
+    
     }
 }
 
@@ -474,7 +473,7 @@ int obtenerPesoArista(Galaxia* origen, char* destino) {
         }
         arista = arista->siguiente;
     }
-    return -1; // No hay arista entre las galaxias
+    return -1; 
 }
 
 void secuenciaDeViaje(Galaxia* galaxiaActual) {
@@ -623,8 +622,7 @@ int main() {
         viajeGuiado();
     }
 
-    // Liberar memoria y finalizar
-    // Aquí podrías agregar código para liberar la memoria asignada y realizar cualquier limpieza necesaria
+    
 
     return 0;
 }

@@ -15,10 +15,10 @@ typedef struct Galaxia {
 } Galaxia;
 
 // Variables globales
-extern Galaxia* galaxias;  // Lista de galaxias
-extern int combustible;    // Combustible de la nave
-extern char* ubicacion_nave; // Ubicación actual de la nave
-extern int modo_viaje; // 0 para autónomo, 1 para guiado
+extern Galaxia* galaxias;  
+extern int combustible;    
+extern char* ubicacion_nave; 
+extern int modo_viaje; 
 
 
 // Declaración de las funciones
@@ -28,4 +28,4 @@ void agregarArista(Galaxia* galaxia, char* destino, int peso);
 void guardarDatos(const char* nombreArchivo);
 void modificarPesoArista(Galaxia* galaxias);
 
-#endif // GALAXIA_H
+#endif 

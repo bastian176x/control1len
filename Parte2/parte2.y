@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../Parte1/galaxias.h"  // Incluir el archivo de cabecera de la Parte 1
+#include "../Parte1/galaxias.h" 
 
 void cargarGalaxia(char* nombre);
 void cargarArista(char* origen, char* destino, int peso);

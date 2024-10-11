@@ -1,5 +1,5 @@
 %{
-#include "galaxia.tab.h"  // Asegúrate de que el archivo generado por Bison está siendo incluido correctamente.
+#include "galaxia.tab.h" 
 #include <stdio.h>
 #include <stdlib.h>
 %}
