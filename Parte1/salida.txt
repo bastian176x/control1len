@@ -1,56 +1,37 @@
-Galaxia: E1
-  Arista hacia: E, Peso: 8
-  Arista hacia: A, Peso: 25
-Galaxia: A3
-  Arista hacia: A, Peso: 2
-Galaxia: A2
-  Arista hacia: A, Peso: 1
-Galaxia: A1
-  Arista hacia: A, Peso: 3
-Galaxia: I2
-  Arista hacia: I, Peso: 8
-Galaxia: I1
-  Arista hacia: I, Peso: 6
-Galaxia: I
-  Arista hacia: I2, Peso: 8
-  Arista hacia: I1, Peso: 6
-  Arista hacia: H, Peso: 12
-  Arista hacia: G, Peso: 8
-Galaxia: A
-  Arista hacia: E1, Peso: 25
-  Arista hacia: B, Peso: 777
-  Arista hacia: D, Peso: 7
-  Arista hacia: A3, Peso: 2
-  Arista hacia: A2, Peso: 1
-  Arista hacia: A1, Peso: 3
-Galaxia: B
-  Arista hacia: C, Peso: 21
-  Arista hacia: E, Peso: 21
-  Arista hacia: D, Peso: 23
-  Arista hacia: A, Peso: 18
-Galaxia: C
-  Arista hacia: F, Peso: 13
-  Arista hacia: B, Peso: 21
-Galaxia: D
-  Arista hacia: G, Peso: 11
-  Arista hacia: H, Peso: 12
-  Arista hacia: B, Peso: 23
-  Arista hacia: A, Peso: 7
-Galaxia: E
-  Arista hacia: G, Peso: 12
-  Arista hacia: E1, Peso: 8
-  Arista hacia: B, Peso: 21
-Galaxia: F
-  Arista hacia: G, Peso: 19
-  Arista hacia: C, Peso: 13
-Galaxia: G
-  Arista hacia: I, Peso: 8
-  Arista hacia: H, Peso: 16
-  Arista hacia: F, Peso: 19
-  Arista hacia: E, Peso: 12
-  Arista hacia: D, Peso: 11
-Galaxia: H
-  Arista hacia: I, Peso: 12
-  Arista hacia: G, Peso: 16
-  Arista hacia: D, Peso: 12
-Nave: Combustible: 1000, Ubicación: I1
+galaxia E1;
+galaxia A3;
+galaxia A2;
+galaxia A1;
+galaxia I2;
+galaxia I1;
+galaxia I;
+galaxia A;
+galaxia B;
+galaxia C;
+galaxia D;
+galaxia E;
+galaxia F;
+galaxia G;
+galaxia H;
+arista I, I2 = peso = 8;
+arista I, I1 = peso = 6;
+arista A, E1 = peso = 25;
+arista A, B = peso = 18;
+arista A, D = peso = 7;
+arista A, A3 = peso = 2;
+arista A, A2 = peso = 1;
+arista A, A1 = peso = 3;
+arista B, C = peso = 21;
+arista B, E = peso = 21;
+arista B, D = peso = 23;
+arista C, F = peso = 13;
+arista D, G = peso = 11;
+arista D, H = peso = 12;
+arista E, G = peso = 12;
+arista E, E1 = peso = 8;
+arista F, G = peso = 19;
+arista G, I = peso = 8;
+arista G, H = peso = 16;
+arista H, I = peso = 12;
+
+nave Enterprise, combustible = 1000, I1, reabastecer;

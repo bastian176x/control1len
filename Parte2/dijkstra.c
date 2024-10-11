@@ -1,22 +1,72 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-// Estructuras definidas aquí porque el .h solo las declara como 'struct'
-typedef struct Arista {
-    char* destino;
-    int peso;
-    struct Arista* siguiente;
-} Arista;
-
-typedef struct Galaxia {
-    char* nombre;
-    Arista* adyacencias;
-    struct Galaxia* siguiente;
-} Galaxia;
-int combustible = 0;
+#include <ctype.h>  // Necesario para isspace
+#include "../Parte1/galaxias.h"
+#include "../utils/utils.h"
+  // Incluir el archivo de cabecera de la Parte 1
 
 #define INFINITO 999999
+
+
+// Funciones relacionadas con el algoritmo de Dijkstra (puedes reutilizar las otras desde galaxia.h)
+Galaxia* encontrarMenorDistancia(Galaxia* lista, int* distancias, int* visitados);
+void dijkstra(Galaxia* lista, char* inicio, char* destino);
+void cargarDatos(const char* nombreArchivo);
+
+
+
+
+// Función para cargar los datos desde el archivo generado (reutilizando agregarGalaxia, agregarArista, etc.)
+void cargarDatos(const char* nombreArchivo) {
+    FILE* archivo = fopen(nombreArchivo, "r");
+    if (!archivo) {
+        perror("Error al abrir el archivo de salida");
+        return;
+    }
+
+    char linea[256];
+    while (fgets(linea, sizeof(linea), archivo)) {
+        if (strncmp(linea, "galaxia ", 8) == 0) {
+            char nombreGalaxia[100];
+            sscanf(linea, "galaxia %[^;];", nombreGalaxia);
+            trimWhitespace(nombreGalaxia);  // Recortar espacios en blanco
+            if (!buscarGalaxia(galaxias, nombreGalaxia)) {
+                galaxias = agregarGalaxia(galaxias, nombreGalaxia);
+            }
+        } else if (strncmp(linea, "arista ", 7) == 0) {
+            char origen[100], destino[100];
+            int peso;
+            sscanf(linea, "arista %[^,], %[^=]= peso = %d;", origen, destino, &peso);
+
+            trimWhitespace(origen);   // Recortar espacios en blanco
+            trimWhitespace(destino);  // Recortar espacios en blanco
+
+            Galaxia* origenGalaxia = buscarGalaxia(galaxias, origen);
+            Galaxia* destinoGalaxia = buscarGalaxia(galaxias, destino);
+
+            if (origenGalaxia == NULL || destinoGalaxia == NULL) {
+                printf("Error: Galaxia de origen '%s' o destino '%s' no existe\n", origen, destino);
+                continue;
+            }
+
+            agregarArista(origenGalaxia, destino, peso);
+        } else if (strncmp(linea, "nave ", 5) == 0) {
+            char nombreNave[100], ubicacion[100];
+            sscanf(linea, "nave %[^,], combustible = %d, %[^,], reabastecer;", nombreNave, &combustible, ubicacion);
+            trimWhitespace(nombreNave);    // Recortar espacios en blanco
+            trimWhitespace(ubicacion);     // Recortar espacios en blanco
+            ubicacion_nave = strdup(ubicacion);
+        }
+    }
+
+    fclose(archivo);
+}
+
+
+
+
+// Implementación del algoritmo de Dijkstra
 Galaxia* encontrarMenorDistancia(Galaxia* lista, int* distancias, int* visitados) {
     Galaxia* menorNodo = NULL;
     int menorDistancia = INFINITO;
@@ -154,3 +204,20 @@ void dijkstra(Galaxia* lista, char* inicio, char* destino) {
         printf("\n");
     }
 }
+
+int main() {
+    // Cargar los datos desde el archivo generado
+    cargarDatos("../Parte1/salida.txt");
+
+    // Imprimir el estado de la nave
+    printf("La nave está en %s con %d unidades de combustible.\n", ubicacion_nave, combustible);
+
+    // Ejecutar el algoritmo de Dijkstra
+    char destino[100];
+    printf("Ingrese el destino para la nave: ");
+    scanf("%s", destino);
+
+    dijkstra(galaxias, ubicacion_nave, destino);
+
+    return 0;
+ }
