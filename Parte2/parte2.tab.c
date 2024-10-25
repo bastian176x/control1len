@@ -72,39 +72,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../Parte1/galaxias.h" 
+#include "parte2.tab.h"
+#include "../Parte1/galaxias.h"
+void cargarDatos(const char* nombreArchivo);
+#define MAX_COMBUSTIBLE 30  // Capacidad máxima de combustible
 
-void cargarGalaxia(char* nombre);
-void cargarArista(char* origen, char* destino, int peso);
-void cargarNave(char* nombre, int combust, char* ubicacion);
+// Declarar funciones
+void viajar(const char* destino);
+void mostrar_combustible();
+void reabastecer_combustible();
+void ruta_optima(const char* origen, const char* destino);
+void ruta_corta(const char* origen, const char* destino);
+void mostrar_ayuda();
+void secuenciaDeViaje(Galaxia* galaxiaActual, const char* secuencia);
+void mostrarGalaxiasVecinas(Galaxia* galaxia, int radio);
+void mostrar_galaxia_actual();
 
-int yylex();
+// Variables globales
+extern int combustible;
+extern char* ubicacion_nave;
+extern Galaxia* galaxias;
 
-void cargarGalaxia(char* nombre) {
-    galaxias = agregarGalaxia(galaxias, nombre);
-}
-
-void cargarArista(char* origen, char* destino, int peso) {
-    agregarArista(buscarGalaxia(galaxias, origen), destino, peso);
-}
-
-void cargarNave(char* nombre, int combust, char* ubicacion) {
-    combustible = combust;
-    if (ubicacion_nave != NULL) {
-        free(ubicacion_nave);
-    }
-    ubicacion_nave = strdup(ubicacion);
-    // El modo de viaje se establecerá más adelante
-    printf("Nave '%s' creada con %d unidades de combustible en la galaxia '%s'\n",
-           nombre, combustible, ubicacion_nave);
-}
-
-
+int yylex(void);
 void yyerror(const char* s) {
-    fprintf(stderr, "Error de sintaxis: %s\n", s);
+    if (yylval.strval) {
+        fprintf(stderr, "Error: %s en el token con valor '%s'\n", s, yylval.strval);
+    } else {
+        fprintf(stderr, "Error: %s en el token con valor '%d'\n", s, yylval.intval);
+    }
 }
 
-#line 108 "parte2.tab.c"
+
+#line 107 "parte2.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -135,22 +134,23 @@ enum yysymbol_kind_t
   YYSYMBOL_YYEOF = 0,                      /* "end of file"  */
   YYSYMBOL_YYerror = 1,                    /* error  */
   YYSYMBOL_YYUNDEF = 2,                    /* "invalid token"  */
-  YYSYMBOL_GALAXIA = 3,                    /* GALAXIA  */
-  YYSYMBOL_ARISTA = 4,                     /* ARISTA  */
-  YYSYMBOL_NAVE = 5,                       /* NAVE  */
-  YYSYMBOL_REABASTECER = 6,                /* REABASTECER  */
-  YYSYMBOL_AUTONOMO = 7,                   /* AUTONOMO  */
-  YYSYMBOL_GUIADO = 8,                     /* GUIADO  */
-  YYSYMBOL_IDENTIFICADOR = 9,              /* IDENTIFICADOR  */
-  YYSYMBOL_NUMERO = 10,                    /* NUMERO  */
-  YYSYMBOL_YYACCEPT = 11,                  /* $accept  */
-  YYSYMBOL_inicio = 12,                    /* inicio  */
-  YYSYMBOL_lista_galaxias = 13,            /* lista_galaxias  */
-  YYSYMBOL_galaxia = 14,                   /* galaxia  */
-  YYSYMBOL_15_1 = 15,                      /* $@1  */
-  YYSYMBOL_lista_aristas = 16,             /* lista_aristas  */
-  YYSYMBOL_arista = 17,                    /* arista  */
-  YYSYMBOL_nave = 18                       /* nave  */
+  YYSYMBOL_VIAJAR = 3,                     /* VIAJAR  */
+  YYSYMBOL_COMBUSTIBLE = 4,                /* COMBUSTIBLE  */
+  YYSYMBOL_REABASTECER = 5,                /* REABASTECER  */
+  YYSYMBOL_RUTA_OPTIMA = 6,                /* RUTA_OPTIMA  */
+  YYSYMBOL_RUTA_CORTA = 7,                 /* RUTA_CORTA  */
+  YYSYMBOL_MOSTRAR_VECINAS = 8,            /* MOSTRAR_VECINAS  */
+  YYSYMBOL_VIAJAR_SECUENCIA = 9,           /* VIAJAR_SECUENCIA  */
+  YYSYMBOL_HELP = 10,                      /* HELP  */
+  YYSYMBOL_GALAXIA_ACTUAL = 11,            /* GALAXIA_ACTUAL  */
+  YYSYMBOL_IDENTIFICADOR = 12,             /* IDENTIFICADOR  */
+  YYSYMBOL_NUMERO = 13,                    /* NUMERO  */
+  YYSYMBOL_14_n_ = 14,                     /* '\n'  */
+  YYSYMBOL_YYACCEPT = 15,                  /* $accept  */
+  YYSYMBOL_inicio = 16,                    /* inicio  */
+  YYSYMBOL_comandos = 17,                  /* comandos  */
+  YYSYMBOL_comando = 18,                   /* comando  */
+  YYSYMBOL_lista_identificadores = 19      /* lista_identificadores  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -476,21 +476,21 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  6
+#define YYFINAL  3
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   15
+#define YYLAST   19
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  11
+#define YYNTOKENS  15
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  8
+#define YYNNTS  5
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  10
+#define YYNRULES  15
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  22
+#define YYNSTATES  24
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   265
+#define YYMAXUTOK   268
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -505,7 +505,7 @@ union yyalloc
 static const yytype_int8 yytranslate[] =
 {
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+      14,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -530,15 +530,15 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10
+       5,     6,     7,     8,     9,    10,    11,    12,    13
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    52,    52,    56,    57,    61,    61,    66,    67,    71,
-      75
+       0,    51,    51,    55,    56,    60,    65,    70,    74,    78,
+      84,    90,    95,    99,   105,   109
 };
 #endif
 
@@ -554,10 +554,11 @@ static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "\"end of file\"", "error", "\"invalid token\"", "GALAXIA", "ARISTA",
-  "NAVE", "REABASTECER", "AUTONOMO", "GUIADO", "IDENTIFICADOR", "NUMERO",
-  "$accept", "inicio", "lista_galaxias", "galaxia", "$@1", "lista_aristas",
-  "arista", "nave", YY_NULLPTR
+  "\"end of file\"", "error", "\"invalid token\"", "VIAJAR",
+  "COMBUSTIBLE", "REABASTECER", "RUTA_OPTIMA", "RUTA_CORTA",
+  "MOSTRAR_VECINAS", "VIAJAR_SECUENCIA", "HELP", "GALAXIA_ACTUAL",
+  "IDENTIFICADOR", "NUMERO", "'\\n'", "$accept", "inicio", "comandos",
+  "comando", "lista_identificadores", YY_NULLPTR
 };
 
 static const char *
@@ -567,7 +568,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-9)
+#define YYPACT_NINF (-4)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -581,9 +582,9 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -3,    -8,     2,    -2,    -3,    -9,    -9,    -5,    -9,    -9,
-       1,    -4,    -1,    -9,     1,     0,     3,    -9,     4,     5,
-      -9,    -9
+      -4,     9,    -3,    -4,    -2,    -4,    -4,    -1,     0,     1,
+       3,    -4,    -4,     2,    -4,     5,     6,    -4,    -4,     7,
+      -4,    -4,    -4,    -4
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -591,21 +592,21 @@ static const yytype_int8 yypact[] =
    means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       4,     0,     0,     0,     4,     5,     1,     0,     2,     3,
-       8,     0,     0,     6,     8,     0,     0,     7,     0,     0,
-      10,     9
+       4,     0,     2,     1,     0,     7,     8,     0,     0,     0,
+       0,    13,    12,     0,     5,     0,     0,    11,    14,     6,
+       3,     9,    10,    15
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -9,    -9,     7,    -9,    -9,    -7,    -9,    -9
+      -4,    -4,    -4,    -4,    -4
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,     2,     3,     4,    10,    13,    14,     8
+       0,     1,     2,    13,    19
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -613,37 +614,37 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-       1,     5,     6,     7,    11,    12,    15,    17,    16,    18,
-      20,     9,    19,     0,     0,    21
+       4,     5,     6,     7,     8,     9,    10,    11,    12,     3,
+      14,    15,    16,     0,    17,    18,    20,    21,    22,    23
 };
 
 static const yytype_int8 yycheck[] =
 {
-       3,     9,     0,     5,     9,     4,    10,    14,     9,     9,
-       6,     4,     9,    -1,    -1,    10
+       3,     4,     5,     6,     7,     8,     9,    10,    11,     0,
+      12,    12,    12,    -1,    13,    12,    14,    12,    12,    12
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
    state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,     3,    12,    13,    14,     9,     0,     5,    18,    13,
-      15,     9,     4,    16,    17,    10,     9,    16,     9,     9,
-       6,    10
+       0,    16,    17,     0,     3,     4,     5,     6,     7,     8,
+       9,    10,    11,    18,    12,    12,    12,    13,    12,    19,
+      14,    12,    12,    12
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    11,    12,    13,    13,    15,    14,    16,    16,    17,
-      18
+       0,    15,    16,    17,    17,    18,    18,    18,    18,    18,
+      18,    18,    18,    18,    19,    19
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     2,     2,     0,     0,     4,     2,     0,     4,
-       5
+       0,     2,     1,     3,     0,     2,     2,     1,     1,     3,
+       3,     2,     1,     1,     1,     2
 };
 
 
@@ -1106,26 +1107,108 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 5: /* $@1: %empty  */
-#line 61 "parte2.y"
-                          { cargarGalaxia((yyvsp[0].strval)); }
-#line 1113 "parte2.tab.c"
+  case 5: /* comando: VIAJAR IDENTIFICADOR  */
+#line 60 "parte2.y"
+                         {
+        viajar((yyvsp[0].strval));
+        free((yyvsp[0].strval));
+    }
+#line 1117 "parte2.tab.c"
     break;
 
-  case 9: /* arista: ARISTA IDENTIFICADOR IDENTIFICADOR NUMERO  */
-#line 71 "parte2.y"
-                                              { cargarArista((yyvsp[-2].strval), (yyvsp[-1].strval), (yyvsp[0].intval)); }
-#line 1119 "parte2.tab.c"
+  case 6: /* comando: VIAJAR_SECUENCIA lista_identificadores  */
+#line 65 "parte2.y"
+                                           {
+        secuenciaDeViaje(buscarGalaxia(galaxias, ubicacion_nave), (yyvsp[0].strval));
+        free((yyvsp[0].strval));
+    }
+#line 1126 "parte2.tab.c"
     break;
 
-  case 10: /* nave: NAVE IDENTIFICADOR NUMERO IDENTIFICADOR REABASTECER  */
-#line 75 "parte2.y"
-                                                        { cargarNave((yyvsp[-3].strval), (yyvsp[-2].intval), (yyvsp[-1].strval)); }
-#line 1125 "parte2.tab.c"
+  case 7: /* comando: COMBUSTIBLE  */
+#line 70 "parte2.y"
+                {
+        mostrar_combustible();
+    }
+#line 1134 "parte2.tab.c"
+    break;
+
+  case 8: /* comando: REABASTECER  */
+#line 74 "parte2.y"
+                {
+        reabastecer_combustible();
+    }
+#line 1142 "parte2.tab.c"
+    break;
+
+  case 9: /* comando: RUTA_OPTIMA IDENTIFICADOR IDENTIFICADOR  */
+#line 78 "parte2.y"
+                                            {
+        ruta_optima((yyvsp[-1].strval), (yyvsp[0].strval));
+        free((yyvsp[-1].strval));
+        free((yyvsp[0].strval));
+    }
+#line 1152 "parte2.tab.c"
+    break;
+
+  case 10: /* comando: RUTA_CORTA IDENTIFICADOR IDENTIFICADOR  */
+#line 84 "parte2.y"
+                                           {
+        ruta_corta((yyvsp[-1].strval), (yyvsp[0].strval));
+        free((yyvsp[-1].strval));
+        free((yyvsp[0].strval));
+    }
+#line 1162 "parte2.tab.c"
+    break;
+
+  case 11: /* comando: MOSTRAR_VECINAS NUMERO  */
+#line 90 "parte2.y"
+                           {
+        printf("El radio ingresado es: %d\n", (yyvsp[0].intval));
+        mostrarGalaxiasVecinas(buscarGalaxia(galaxias, ubicacion_nave), (yyvsp[0].intval));
+    }
+#line 1171 "parte2.tab.c"
+    break;
+
+  case 12: /* comando: GALAXIA_ACTUAL  */
+#line 95 "parte2.y"
+                   {
+        mostrar_galaxia_actual();
+    }
+#line 1179 "parte2.tab.c"
+    break;
+
+  case 13: /* comando: HELP  */
+#line 99 "parte2.y"
+         {
+        mostrar_ayuda();
+    }
+#line 1187 "parte2.tab.c"
+    break;
+
+  case 14: /* lista_identificadores: IDENTIFICADOR  */
+#line 105 "parte2.y"
+                  {
+        (yyval.strval) = strdup((yyvsp[0].strval));
+        free((yyvsp[0].strval));
+    }
+#line 1196 "parte2.tab.c"
+    break;
+
+  case 15: /* lista_identificadores: lista_identificadores IDENTIFICADOR  */
+#line 109 "parte2.y"
+                                          {
+        char* temp = malloc(strlen((yyvsp[-1].strval)) + strlen((yyvsp[0].strval)) + 2); // Espacio para coma y terminador nulo
+        sprintf(temp, "%s,%s", (yyvsp[-1].strval), (yyvsp[0].strval));
+        free((yyvsp[-1].strval));
+        free((yyvsp[0].strval));
+        (yyval.strval) = temp;
+    }
+#line 1208 "parte2.tab.c"
     break;
 
 
-#line 1129 "parte2.tab.c"
+#line 1212 "parte2.tab.c"
 
       default: break;
     }
@@ -1318,5 +1401,17 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 84 "parte2.y"
+#line 118 "parte2.y"
 
+
+int main() {
+
+    // Cargar los datos desde el archivo generado
+    cargarDatos("../Parte1/salida.txt");
+
+    // Entrar en modo comando
+    printf("Bienvenido a la línea de comandos de la nave espacial.\n");
+    yyparse();
+
+    return 0;
+}

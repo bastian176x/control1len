@@ -2,83 +2,129 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../Parte1/galaxias.h" 
+#include "parte2.tab.h"
+#include "../Parte1/galaxias.h"
+void cargarDatos(const char* nombreArchivo);
+#define MAX_COMBUSTIBLE 30  // Capacidad máxima de combustible
 
-void cargarGalaxia(char* nombre);
-void cargarArista(char* origen, char* destino, int peso);
-void cargarNave(char* nombre, int combust, char* ubicacion);
+// Declarar funciones
+void viajar(const char* destino);
+void mostrar_combustible();
+void reabastecer_combustible();
+void ruta_optima(const char* origen, const char* destino);
+void ruta_corta(const char* origen, const char* destino);
+void mostrar_ayuda();
+void secuenciaDeViaje(Galaxia* galaxiaActual, const char* secuencia);
+void mostrarGalaxiasVecinas(Galaxia* galaxia, int radio);
+void mostrar_galaxia_actual();
 
-int yylex();
+// Variables globales
+extern int combustible;
+extern char* ubicacion_nave;
+extern Galaxia* galaxias;
 
-void cargarGalaxia(char* nombre) {
-    galaxias = agregarGalaxia(galaxias, nombre);
-}
-
-void cargarArista(char* origen, char* destino, int peso) {
-    agregarArista(buscarGalaxia(galaxias, origen), destino, peso);
-}
-
-void cargarNave(char* nombre, int combust, char* ubicacion) {
-    combustible = combust;
-    if (ubicacion_nave != NULL) {
-        free(ubicacion_nave);
-    }
-    ubicacion_nave = strdup(ubicacion);
-    // El modo de viaje se establecerá más adelante
-    printf("Nave '%s' creada con %d unidades de combustible en la galaxia '%s'\n",
-           nombre, combustible, ubicacion_nave);
-}
-
-
+int yylex(void);
 void yyerror(const char* s) {
-    fprintf(stderr, "Error de sintaxis: %s\n", s);
+    if (yylval.strval) {
+        fprintf(stderr, "Error: %s en el token con valor '%s'\n", s, yylval.strval);
+    } else {
+        fprintf(stderr, "Error: %s en el token con valor '%d'\n", s, yylval.intval);
+    }
 }
+
 %}
 
 %union {
-    int intval;
     char* strval;
+    int intval;
 }
 
-%token GALAXIA ARISTA NAVE REABASTECER AUTONOMO GUIADO
+%token VIAJAR COMBUSTIBLE REABASTECER RUTA_OPTIMA RUTA_CORTA MOSTRAR_VECINAS VIAJAR_SECUENCIA HELP GALAXIA_ACTUAL
 %token <strval> IDENTIFICADOR
 %token <intval> NUMERO
 
-%type <intval> modo_viaje
+%type <strval> lista_identificadores
 
 %%
 
 inicio:
-    lista_galaxias nave
+    comandos
 ;
 
-lista_galaxias:
-    galaxia lista_galaxias
-    | /* vacío */
+comandos:
+    comandos comando '\n'
+    |
 ;
 
-galaxia:
-    GALAXIA IDENTIFICADOR { cargarGalaxia($2); }
-    lista_aristas
+comando:
+    VIAJAR IDENTIFICADOR {
+        viajar($2);
+        free($2);
+    }
+    |
+    VIAJAR_SECUENCIA lista_identificadores {
+        secuenciaDeViaje(buscarGalaxia(galaxias, ubicacion_nave), $2);
+        free($2);
+    }
+    |
+    COMBUSTIBLE {
+        mostrar_combustible();
+    }
+    |
+    REABASTECER {
+        reabastecer_combustible();
+    }
+    |
+    RUTA_OPTIMA IDENTIFICADOR IDENTIFICADOR {
+        ruta_optima($2, $3);
+        free($2);
+        free($3);
+    }
+    |
+    RUTA_CORTA IDENTIFICADOR IDENTIFICADOR {
+        ruta_corta($2, $3);
+        free($2);
+        free($3);
+    }
+    |
+    MOSTRAR_VECINAS NUMERO {
+        printf("El radio ingresado es: %d\n", $2);
+        mostrarGalaxiasVecinas(buscarGalaxia(galaxias, ubicacion_nave), $2);
+    }
+    |
+    GALAXIA_ACTUAL {
+        mostrar_galaxia_actual();
+    }
+    |
+    HELP {
+        mostrar_ayuda();
+    }
 ;
 
-lista_aristas:
-    arista lista_aristas
-    | /* vacío */
-;
-
-arista:
-    ARISTA IDENTIFICADOR IDENTIFICADOR NUMERO { cargarArista($2, $3, $4); }
-;
-
-nave:
-    NAVE IDENTIFICADOR NUMERO IDENTIFICADOR REABASTECER { cargarNave($2, $3, $4); }
-;
-
-
-modo_viaje:
-    AUTONOMO { $$ = 0; }
-    | GUIADO { $$ = 1; }
+lista_identificadores:
+    IDENTIFICADOR {
+        $$ = strdup($1);
+        free($1);
+    }
+    | lista_identificadores IDENTIFICADOR {
+        char* temp = malloc(strlen($1) + strlen($2) + 2); // Espacio para coma y terminador nulo
+        sprintf(temp, "%s,%s", $1, $2);
+        free($1);
+        free($2);
+        $$ = temp;
+    }
 ;
 
 %%
+
+int main() {
+
+    // Cargar los datos desde el archivo generado
+    cargarDatos("../Parte1/salida.txt");
+
+    // Entrar en modo comando
+    printf("Bienvenido a la línea de comandos de la nave espacial.\n");
+    yyparse();
+
+    return 0;
+}

@@ -2,99 +2,115 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "galaxias.h"  
+#include "parte2.tab.h"
+#include "../Parte1/galaxias.h"
+void cargarDatos(const char* nombreArchivo);
+#define MAX_COMBUSTIBLE 30  // Capacidad máxima de combustible
 
-extern int yylex();
-extern int yyparse();
-extern FILE *yyin;
 
-void yyerror(const char *s);
+// Declarar funciones
+void viajar(const char* destino);
+void mostrar_combustible();
+void reabastecer_combustible();
+void ruta_optima(const char* origen, const char* destino);
+void ruta_corta(const char* origen, const char* destino);
+void mostrar_ayuda();
+void secuenciaDeViaje(Galaxia* galaxiaActual, const char* secuencia);
+void mostrarGalaxiasVecinas(Galaxia* galaxia, int radio);
+void mostrar_galaxia_actual();
+
+// Variables globales
+extern int combustible;
+extern char* ubicacion_nave;
+extern Galaxia* galaxias;
+
+int yylex(void);
+void yyerror(const char* s) {
+    if (yylval.strval) {
+        fprintf(stderr, "Error: %s en el token con valor '%s'\n", s, yylval.strval);
+    } else {
+        fprintf(stderr, "Error: %s en el token con valor '%d'\n", s, yylval.intval);
+    }
+}
+
 %}
 
-
-
 %union {
-    int numero;
-    char* str;
+    char* strval;
+    int intval;
 }
 
-%token <str> GALAXIA NAVE ARISTA COMBUSTIBLE PESO SUBGALAXIA
-%token <numero> NUMERO
-%token <str> IDENTIFICADOR
-%token PUNTOYCOMA COMA IGUAL REABASTECER VIAJAR AUTONOMO GUIADO
+%token VIAJAR COMBUSTIBLE REABASTECER RUTA_OPTIMA RUTA_CORTA MOSTRAR_VECINAS VIAJAR_SECUENCIA HELP GALAXIA_ACTUAL
 
-%type <str> definicion_galaxia definicion_nave definicion_arista ubicacion
+%token <strval> IDENTIFICADOR
+%token <intval> NUMERO
 
 %%
 
-programa:
-    definiciones
+inicio:
+    comandos
 ;
 
-definiciones:
-    definicion_galaxia
-    | definicion_nave
-    | definicion_arista
-    | definiciones definicion_galaxia
-    | definiciones definicion_nave
-    | definiciones definicion_arista
+comandos:
+    comandos comando '\n'
+    |
 ;
 
-definicion_galaxia:
-    GALAXIA IDENTIFICADOR PUNTOYCOMA
-    {
-        if(buscarGalaxia(galaxias, $2) == NULL){
-            galaxias = agregarGalaxia(galaxias, $2);
-        }
+comando:
+    VIAJAR IDENTIFICADOR {
+        viajar($2);
+        free($2);
     }
-;
-
-definicion_nave:
-    NAVE IDENTIFICADOR COMA COMBUSTIBLE IGUAL NUMERO COMA ubicacion COMA REABASTECER PUNTOYCOMA
-    {
-        combustible = $6;
-        ubicacion_nave = strdup($8);
-        printf("Nave '%s' creada con %d unidades de combustible en la galaxia '%s'\n", $2, combustible, ubicacion_nave);
+    |
+    VIAJAR_SECUENCIA IDENTIFICADOR {
+        secuenciaDeViaje(buscarGalaxia(galaxias, ubicacion_nave), $2);
+        free($2);
     }
-;
-
-definicion_arista:
-    ARISTA IDENTIFICADOR COMA IDENTIFICADOR IGUAL PESO IGUAL NUMERO PUNTOYCOMA
-    {
-        Galaxia* origen = buscarGalaxia(galaxias, $2);
-        Galaxia* destino = buscarGalaxia(galaxias, $4);
-        if(origen && destino){
-            agregarArista(origen, $4, $8);
-        } else {
-            printf("Error: Las galaxias %s o %s no existen.\n", $2, $4);
-        }
+    |
+    COMBUSTIBLE {
+        mostrar_combustible();
     }
-;
+    |
+    REABASTECER {
+        reabastecer_combustible();
+    }
+    |
+    RUTA_OPTIMA IDENTIFICADOR IDENTIFICADOR {
+        ruta_optima($2, $3);
+        free($2);
+        free($3);
+    }
+    |
+    RUTA_CORTA IDENTIFICADOR IDENTIFICADOR {
+        ruta_corta($2, $3);
+        free($2);
+        free($3);
+    }
+    |
+    MOSTRAR_VECINAS NUMERO {
+        printf("El radio ingresado es: %d\n", $2);
+        mostrarGalaxiasVecinas(buscarGalaxia(galaxias, ubicacion_nave), $2);
+    }
 
-ubicacion:
-    IDENTIFICADOR
-    {
-        $$ = $1;
+    |
+    GALAXIA_ACTUAL {
+        mostrar_galaxia_actual();
+    }
+    |
+    HELP {
+        mostrar_ayuda();
     }
 ;
 
 %%
 
-void yyerror(const char *s) {
-    fprintf(stderr, "Error: %s\n", s);
-}
-
-int main(int argc, char **argv) {
-    if (argc > 1) {
-        FILE *archivo = fopen(argv[1], "r");
-        if (!archivo) {
-            perror("No se pudo abrir el archivo");
-            return 1;
-        }
-        yyin = archivo;
-    }
+int main() {
+    // Cargar los datos desde el archivo generado
+    cargarDatos("../Parte1/salida.txt");
+    
+    // Entrar en modo comando
+    printf("Bienvenido a la línea de comandos de la nave espacial.\n");
     yyparse();
-    modificarPesoArista(galaxias);
-    guardarDatos("salida.txt");
+    
     return 0;
 }

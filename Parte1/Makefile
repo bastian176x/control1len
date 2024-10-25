@@ -4,20 +4,19 @@ CFLAGS = -Wall -g
 LEX = flex
 YACC = bison -d
 
-# Archivos fuente
+# Source files
 LEX_FILE = galaxia.l
 YACC_FILE = galaxia.y
-SRC_PART1 = galaxias.c
-OBJS_PART1 = galaxia.tab.o lex.yy.o galaxias.o
+UTILS_SRC = ../utils/utils.c
+OBJS_PART1 = galaxia.tab.o lex.yy.o galaxias.o utils.o
 
-# Archivos de salida
+# Output executable
 EXEC_PART1 = galaxia
 
-# Reglas
+# Rules
 
 all: $(EXEC_PART1)
 
-# Compilar Parte 1 (galaxia)
 $(EXEC_PART1): $(OBJS_PART1)
 	$(CC) $(CFLAGS) -o $(EXEC_PART1) $(OBJS_PART1)
 
@@ -35,6 +34,9 @@ lex.yy.o: lex.yy.c
 
 galaxias.o: galaxias.c galaxias.h
 	$(CC) $(CFLAGS) -c galaxias.c
+
+utils.o: $(UTILS_SRC)
+	$(CC) $(CFLAGS) -c $(UTILS_SRC)
 
 clean:
 	rm -f $(OBJS_PART1) $(EXEC_PART1) galaxia.tab.c galaxia.tab.h lex.yy.c

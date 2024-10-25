@@ -54,14 +54,17 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    GALAXIA = 258,                 /* GALAXIA  */
-    ARISTA = 259,                  /* ARISTA  */
-    NAVE = 260,                    /* NAVE  */
-    REABASTECER = 261,             /* REABASTECER  */
-    AUTONOMO = 262,                /* AUTONOMO  */
-    GUIADO = 263,                  /* GUIADO  */
-    IDENTIFICADOR = 264,           /* IDENTIFICADOR  */
-    NUMERO = 265                   /* NUMERO  */
+    VIAJAR = 258,                  /* VIAJAR  */
+    COMBUSTIBLE = 259,             /* COMBUSTIBLE  */
+    REABASTECER = 260,             /* REABASTECER  */
+    RUTA_OPTIMA = 261,             /* RUTA_OPTIMA  */
+    RUTA_CORTA = 262,              /* RUTA_CORTA  */
+    MOSTRAR_VECINAS = 263,         /* MOSTRAR_VECINAS  */
+    VIAJAR_SECUENCIA = 264,        /* VIAJAR_SECUENCIA  */
+    HELP = 265,                    /* HELP  */
+    GALAXIA_ACTUAL = 266,          /* GALAXIA_ACTUAL  */
+    IDENTIFICADOR = 267,           /* IDENTIFICADOR  */
+    NUMERO = 268                   /* NUMERO  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -70,12 +73,12 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 38 "parte2.y"
+#line 37 "parte2.y"
 
-    int intval;
     char* strval;
+    int intval;
 
-#line 79 "parte2.tab.h"
+#line 82 "parte2.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

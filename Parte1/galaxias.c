@@ -5,10 +5,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "../utils/utils.h"
 
-// NO DEFINIR LAS VARIABLES GLOBALES AQUÍ
-// Las variables globales están definidas en dijkstra.c y declaradas como extern en galaxias.h
+// Definir las variables globales aquí
+Galaxia* galaxias = NULL;
+char* ubicacion_nave = NULL;
+char* nombre_nave = NULL;  // Variable para almacenar el nombre de la nave
+int combustible = 0;
 
 // Implementación de las funciones
 
@@ -41,7 +43,6 @@ void agregarArista(Galaxia* galaxia, char* destino, int peso) {
         printf("Error: Galaxia o destino nulo en agregarArista\n");
         return;
     }
-    trimWhitespace(destino);
 
     Galaxia* destinoGalaxia = buscarGalaxia(galaxias, destino);
     if (destinoGalaxia == NULL) {
@@ -74,6 +75,20 @@ void agregarArista(Galaxia* galaxia, char* destino, int peso) {
     destinoGalaxia->adyacencias = aristaInversa;
 }
 
+void modificarPesoArista(Galaxia* origen, char* destino, int nuevoPeso) {
+    Arista* actual = origen->adyacencias;
+    while (actual != NULL) {
+        if (strcmp(actual->destino, destino) == 0) {
+            printf("Modificando peso de la arista de %s a %s, peso anterior: %d, nuevo peso: %d\n", 
+                   origen->nombre, destino, actual->peso, nuevoPeso);
+            actual->peso = nuevoPeso;
+            return;
+        }
+        actual = actual->siguiente;
+    }
+    printf("La arista entre %s y %s no existe.\n", origen->nombre, destino);
+}
+
 void guardarDatos(const char* nombreArchivo) {
     FILE* archivo = fopen(nombreArchivo, "w");
     if (!archivo) {
@@ -81,68 +96,91 @@ void guardarDatos(const char* nombreArchivo) {
         return;
     }
 
-    // Guardar las galaxias en el formato "galaxia X;"
+    // **Ordenar las galaxias alfabéticamente**
+    // Contar el número de galaxias
+    int numGalaxias = 0;
     Galaxia* actualGalaxia = galaxias;
     while (actualGalaxia != NULL) {
-        fprintf(archivo, "galaxia %s;\n", actualGalaxia->nombre);
+        numGalaxias++;
         actualGalaxia = actualGalaxia->siguiente;
     }
 
-    // Guardar las aristas en el formato "arista X, Y = peso = Z;"
+    // Crear un arreglo para las galaxias
+    Galaxia** arregloGalaxias = (Galaxia**)malloc(numGalaxias * sizeof(Galaxia*));
     actualGalaxia = galaxias;
-    while (actualGalaxia != NULL) {
+    for (int i = 0; i < numGalaxias; i++) {
+        arregloGalaxias[i] = actualGalaxia;
+        actualGalaxia = actualGalaxia->siguiente;
+    }
+
+    // Ordenar el arreglo de galaxias
+    for (int i = 0; i < numGalaxias - 1; i++) {
+        for (int j = i + 1; j < numGalaxias; j++) {
+            if (strcmp(arregloGalaxias[i]->nombre, arregloGalaxias[j]->nombre) > 0) {
+                Galaxia* temp = arregloGalaxias[i];
+                arregloGalaxias[i] = arregloGalaxias[j];
+                arregloGalaxias[j] = temp;
+            }
+        }
+    }
+
+    // Guardar las galaxias en el archivo
+    for (int i = 0; i < numGalaxias; i++) {
+        fprintf(archivo, "galaxia %s;\n", arregloGalaxias[i]->nombre);
+    }
+
+    // **Guardar las aristas**
+    // Para evitar duplicados, almacenamos las aristas en un arreglo y las ordenamos
+    typedef struct {
+        char* origen;
+        char* destino;
+        int peso;
+    } AristaInfo;
+
+    int maxAristas = 1000; // Asumiendo que no habrá más de 1000 aristas
+    AristaInfo* aristas = (AristaInfo*)malloc(maxAristas * sizeof(AristaInfo));
+    int numAristas = 0;
+
+    for (int i = 0; i < numGalaxias; i++) {
+        actualGalaxia = arregloGalaxias[i];
         Arista* actualArista = actualGalaxia->adyacencias;
         while (actualArista != NULL) {
-            // Para evitar duplicar las aristas (ambos sentidos), imprime solo si la galaxia actual es lexicográficamente menor que la galaxia destino
+            // Para evitar duplicados, solo agregamos la arista si origen < destino
             if (strcmp(actualGalaxia->nombre, actualArista->destino) < 0) {
-                fprintf(archivo, "arista %s, %s = peso = %d;\n", actualGalaxia->nombre, actualArista->destino, actualArista->peso);
+                aristas[numAristas].origen = actualGalaxia->nombre;
+                aristas[numAristas].destino = actualArista->destino;
+                aristas[numAristas].peso = actualArista->peso;
+                numAristas++;
             }
             actualArista = actualArista->siguiente;
         }
-        actualGalaxia = actualGalaxia->siguiente;
     }
+
+    // Ordenar las aristas alfabéticamente por origen y luego por destino
+    for (int i = 0; i < numAristas - 1; i++) {
+        for (int j = i + 1; j < numAristas; j++) {
+            int cmpOrigen = strcmp(aristas[i].origen, aristas[j].origen);
+            if (cmpOrigen > 0 || (cmpOrigen == 0 && strcmp(aristas[i].destino, aristas[j].destino) > 0)) {
+                AristaInfo temp = aristas[i];
+                aristas[i] = aristas[j];
+                aristas[j] = temp;
+            }
+        }
+    }
+
+    // Guardar las aristas en el archivo
+    for (int i = 0; i < numAristas; i++) {
+        fprintf(archivo, "arista %s, %s = peso = %d;\n", aristas[i].origen, aristas[i].destino, aristas[i].peso);
+    }
+
+    // Liberar memoria de las aristas
+    free(aristas);
+    free(arregloGalaxias);
 
     // Guardar los datos de la nave en el formato correcto
-    fprintf(archivo, "\nnave Enterprise, combustible = %d, %s, reabastecer;\n", combustible, ubicacion_nave);
+    if (nombre_nave != NULL && ubicacion_nave != NULL) {
+        fprintf(archivo, "\nnave %s, combustible = %d, %s, reabastecer;\n", nombre_nave, combustible, ubicacion_nave);
+    }
 
     fclose(archivo);
-}
-
-void modificarPesoArista(Galaxia* galaxias) {
-    char confirmacion;
-    char origen[100];
-    char destino[100];
-    int nuevoPeso;
-
-    printf("Desea modificar el peso de alguna arista? (s/n): ");
-    scanf(" %c", &confirmacion);
-
-    if (confirmacion == 's' || confirmacion == 'S') {
-        printf("Ingrese el nombre de la galaxia de origen (solo se permiten galaxias adyacentes): ");
-        scanf("%s", origen);
-        Galaxia* galaxiaOrigen = buscarGalaxia(galaxias, origen);
-        if (galaxiaOrigen == NULL) {
-            printf("La galaxia de origen no existe.\n");
-            return;
-        }
-
-        printf("Ingrese el nombre de la galaxia de destino (solo se permiten galaxias adyacentes): ");
-        scanf("%s", destino);
-
-        Arista* actual = galaxiaOrigen->adyacencias;
-        while (actual != NULL) {
-            if (strcmp(actual->destino, destino) == 0) {
-                printf("Se ha encontrado la arista de %s a %s con peso actual %d.\n", origen, destino, actual->peso);
-                printf("Ingrese el nuevo peso para la arista de %s a %s: ", origen, destino);
-                scanf("%d", &nuevoPeso);
-                actual->peso = nuevoPeso;
-                printf("Peso de la arista modificado exitosamente.\n");
-                return;
-            }
-            actual = actual->siguiente;
-        }
-        printf("La arista entre %s y %s no existe.\n", origen, destino);
-    } else {
-        printf("Modificación cancelada.\n");
-    }
 }

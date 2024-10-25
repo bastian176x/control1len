@@ -1,38 +1,82 @@
-// dijkstra.c
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
 #include "../Parte1/galaxias.h"
 #include "../utils/utils.h"
 
 #define INFINITO 999999
-#define MAX_COMBUSTIBLE 500  // Capacidad máxima de combustible
+#define MAX_COMBUSTIBLE 30  // Capacidad máxima de combustible
 
 // Declaración de variables globales
-Galaxia* galaxias = NULL;
-char* ubicacion_nave = NULL;
-int combustible = MAX_COMBUSTIBLE;
+extern Galaxia* galaxias;
+extern char* ubicacion_nave;
+extern int combustible;
+
 int modo_viaje = 0; // 0 para autónomo, 1 para guiado
 
 // Declaración de funciones
 void cargarDatos(const char* nombreArchivo);
-void dijkstraConCombustible(Galaxia* lista, char* inicio, char* destino);
+void dijkstraConCombustible(Galaxia* lista, const char* inicio, const char* destino);
 void shortestPathByGalaxies(Galaxia* lista, char* inicio, char* destino);
 void viajeGuiado();
 void mostrarGalaxiasVecinas(Galaxia* galaxia, int radio);
 int esVecina(Galaxia* galaxia, char* nombreDestino);
 int obtenerPesoArista(Galaxia* origen, char* destino);
-void secuenciaDeViaje(Galaxia* galaxiaActual);
+void secuenciaDeViaje(Galaxia* galaxiaActual, const char* secuencia);
 int esEstacionReabastecimiento(char* nombreGalaxia);
+void mostrar_ayuda();
+void mostrar_galaxia_actual();
+int combustible_maximo;
+// **Implementaciones de las funciones faltantes**
+void viajar(const char* destino) {
+    printf("Ejecutando comando 'viajar' hacia: %s\n", destino);
+    printf("Combustible antes del viaje: %d\n", combustible);
+    dijkstraConCombustible(galaxias, ubicacion_nave, destino);
+    printf("Combustible después del viaje: %d\n", combustible);
+}
+
+void mostrar_combustible() {
+    printf("El combustible restante es: %d\n", combustible);
+}
+
+void reabastecer_combustible() {
+    if (esEstacionReabastecimiento(ubicacion_nave)) {
+        combustible = combustible_maximo;  // Reabastece hasta el valor máximo leído del archivo
+        printf("Reabastecido. Combustible actual: %d\n", combustible);
+    } else {
+        printf("No es posible reabastecer en la galaxia actual.\n");
+    }
+}
+
+
+void ruta_optima(const char* origen, const char* destino) {
+    // Verificar si la ubicación actual de la nave coincide con el origen proporcionado
+    if (strcmp(ubicacion_nave, origen) != 0) {
+        printf("Error: La nave no está en la galaxia '%s'. Actualmente se encuentra en '%s'.\n", origen, ubicacion_nave);
+        return;
+    }
+
+    printf("Calculando la ruta óptima de %s a %s...\n", origen, destino);
+    dijkstraConCombustible(galaxias, (char*)origen, (char*)destino);
+}
+
+
+void ruta_corta(const char* origen, const char* destino) {
+    // Verificar si la ubicación actual de la nave coincide con el origen proporcionado
+    if (strcmp(ubicacion_nave, origen) != 0) {
+        printf("Error: La nave no está en la galaxia '%s'. Actualmente se encuentra en '%s'.\n", origen, ubicacion_nave);
+        return;
+    }
+
+    printf("Calculando la ruta con menos galaxias de %s a %s...\n", origen, destino);
+    shortestPathByGalaxies(galaxias, (char*)origen, (char*)destino);
+}
+
 
 // Galaxias donde se puede reabastecer
 const char* estacionesReabastecimiento[] = {"H", "G", "B"};
 const int numEstacionesReabastecimiento = 3;
-
-// Implementación de funciones
 
 // Función para verificar si una galaxia es una estación de reabastecimiento
 int esEstacionReabastecimiento(char* nombreGalaxia) {
@@ -43,6 +87,59 @@ int esEstacionReabastecimiento(char* nombreGalaxia) {
     }
     return 0;
 }
+
+void secuenciaDeViaje(Galaxia* galaxiaActual, const char* secuencia) {
+    char secuenciaCopia[500];
+    strcpy(secuenciaCopia, secuencia); // Hacemos una copia para no modificar el parámetro original
+
+    char* token = strtok(secuenciaCopia, ",");
+    while (token != NULL) {
+        trimWhitespace(token);
+        Galaxia* galaxiaDestino = buscarGalaxia(galaxias, token);
+        if (galaxiaDestino == NULL) {
+            printf("La galaxia '%s' no existe. Viaje cancelado.\n", token);
+            return;
+        }
+        if (esVecina(galaxiaActual, token)) {
+            // Obtener el peso de la arista
+            int peso = obtenerPesoArista(galaxiaActual, token);
+
+            // Verificar si hay suficiente combustible
+            if (combustible < peso) {
+                // Verificar si la galaxia actual es una estación de reabastecimiento
+                if (esEstacionReabastecimiento(galaxiaActual->nombre)) {
+                    printf("No hay suficiente combustible para viajar a '%s'. Reabasteciendo en '%s'.\n", token, galaxiaActual->nombre);
+                    combustible = combustible_maximo;
+                    printf("Combustible reabastecido. Combustible actual: %d\n", combustible);
+                } else {
+                    printf("No es posible reabastecer en la galaxia '%s'. Viaje cancelado.\n", galaxiaActual->nombre);
+                    return;
+                }
+            }
+
+            // Restar el peso al combustible
+            combustible -= peso;
+
+            // Actualizar la galaxia actual
+            galaxiaActual = galaxiaDestino;
+            printf("Viaje exitoso a la galaxia '%s'. Combustible restante: %d\n", token, combustible);
+
+            // Verificar si el combustible se ha agotado
+            if (combustible <= 0) {
+                printf("La nave se ha quedado sin combustible y ha quedado a la deriva. La tripulación ha muerto.\n");
+                exit(0); // Finalizar el programa
+            }
+        } else {
+            printf("La galaxia '%s' no es vecina de la galaxia actual '%s'. Viaje cancelado.\n", token, galaxiaActual->nombre);
+            return;
+        }
+        token = strtok(NULL, ",");
+    }
+
+    // Actualizar la ubicación de la nave
+    ubicacion_nave = strdup(galaxiaActual->nombre);
+}
+
 
 // Función para cargar los datos desde el archivo generado
 void cargarDatos(const char* nombreArchivo) {
@@ -86,9 +183,7 @@ void cargarDatos(const char* nombreArchivo) {
             trimWhitespace(ubicacion);
             ubicacion_nave = strdup(ubicacion);
             combustible = combust;  // Asigna el combustible leído
-            if (combustible > MAX_COMBUSTIBLE) {
-                combustible = MAX_COMBUSTIBLE;  // No exceder el máximo
-            }
+            combustible_maximo = combust;
         }
     }
 
@@ -96,7 +191,7 @@ void cargarDatos(const char* nombreArchivo) {
 }
 
 // Implementación del algoritmo de Dijkstra con manejo de combustible y restricción de reabastecimiento
-void dijkstraConCombustible(Galaxia* lista, char* inicio, char* destino) {
+void dijkstraConCombustible(Galaxia* lista, const char* inicio, const char* destino) {
     int distancias[100];
     int visitados[100] = {0};
     Galaxia* predecesores[100] = {NULL};
@@ -111,6 +206,7 @@ void dijkstraConCombustible(Galaxia* lista, char* inicio, char* destino) {
         actual = actual->siguiente;
         index++;
     }
+    
 
     int num_nodos = index;
 
@@ -181,6 +277,7 @@ void dijkstraConCombustible(Galaxia* lista, char* inicio, char* destino) {
             }
             arista = arista->siguiente;
         }
+        
     }
 
     if (distancias[idxDestino] == INFINITO) {
@@ -240,10 +337,10 @@ void dijkstraConCombustible(Galaxia* lista, char* inicio, char* destino) {
                     // Verificar si la galaxia actual es una estación de reabastecimiento
                     if (esEstacionReabastecimiento(caminoArray[i]->nombre)) {
                         // Reabastecer combustible en la galaxia actual
-                        combustibleRestante = MAX_COMBUSTIBLE;
+                        combustibleRestante = combustible_maximo;
                         printf(" (Reabastecido en %s)", caminoArray[i]->nombre);
                     } else {
-                        printf("\nNo es posible reabastecer en la galaxia '%s'. La nave se ha quedado sin combustible y ha quedado a la deriva. La tripulación ha muerto.\n", caminoArray[i]->nombre);
+                        printf("\nNo es posible reabastecer en la galaxia '%s'. La nave se ha quedado sin combustible y ha quedado a la deriva. La tripulacion ha muerto.\n", caminoArray[i]->nombre);
                         return;
                     }
                 }
@@ -253,7 +350,7 @@ void dijkstraConCombustible(Galaxia* lista, char* inicio, char* destino) {
 
                 // Verificar si el combustible se ha agotado
                 if (combustibleRestante < 0) {
-                    printf("\nLa nave se ha quedado sin combustible y ha quedado a la deriva. La tripulación ha muerto.\n");
+                    printf("\nLa nave se ha quedado sin combustible y ha quedado a la deriva. La tripulacion ha muerto.\n");
                     return;
                 }
 
@@ -262,13 +359,15 @@ void dijkstraConCombustible(Galaxia* lista, char* inicio, char* destino) {
                 printf("\n");
             }
         }
-        printf("Combustible restante después del viaje: %d\n", combustibleRestante);
+        printf("Combustible restante despues del viaje: %d\n", combustibleRestante);
 
         // Actualizar la ubicación de la nave y el combustible global
         ubicacion_nave = strdup(destino);
         combustible = combustibleRestante;
     }
 }
+
+// (Resto del código continúa, incluyendo las otras funciones mencionadas)
 
 // Implementación de la búsqueda de camino más corto por número de galaxias (BFS) con consumo de combustible y restricción de reabastecimiento
 void shortestPathByGalaxies(Galaxia* lista, char* inicio, char* destino) {
@@ -359,10 +458,10 @@ void shortestPathByGalaxies(Galaxia* lista, char* inicio, char* destino) {
                         // Verificar si la galaxia actual es una estación de reabastecimiento
                         if (esEstacionReabastecimiento(nodos[path[i]]->nombre)) {
                             // Reabastecer combustible en la galaxia actual
-                            combustibleRestante = MAX_COMBUSTIBLE;
+                            combustibleRestante = combustible_maximo;
                             printf(" (Reabastecido en %s)", nodos[path[i]]->nombre);
                         } else {
-                            printf("\nNo es posible reabastecer en la galaxia '%s'. La nave se ha quedado sin combustible y ha quedado a la deriva. La tripulación ha muerto.\n", nodos[path[i]]->nombre);
+                            printf("\nNo es posible reabastecer en la galaxia '%s'. La nave se ha quedado sin combustible y ha quedado a la deriva. La tripulacion ha muerto.\n", nodos[path[i]]->nombre);
                             return;
                         }
                     }
@@ -514,219 +613,23 @@ int obtenerPesoArista(Galaxia* origen, char* destino) {
     return -1;
 }
 
-// Función para manejar la secuencia de viaje en modo guiado
-void secuenciaDeViaje(Galaxia* galaxiaActual) {
-    char secuencia[500];
-    printf("Ingrese la secuencia de galaxias separadas por comas (por ejemplo: G1,G2,G3): ");
-    scanf("%s", secuencia);
-
-    char* token = strtok(secuencia, ",");
-    while (token != NULL) {
-        trimWhitespace(token);
-        Galaxia* galaxiaDestino = buscarGalaxia(galaxias, token);
-        if (galaxiaDestino == NULL) {
-            printf("La galaxia '%s' no existe. Viaje cancelado.\n", token);
-            return;
-        }
-        if (esVecina(galaxiaActual, token)) {
-            // Obtener el peso de la arista
-            int peso = obtenerPesoArista(galaxiaActual, token);
-
-            // Verificar si hay suficiente combustible
-            if (combustible < peso) {
-                // Verificar si la galaxia actual es una estación de reabastecimiento
-                if (esEstacionReabastecimiento(galaxiaActual->nombre)) {
-                    printf("No hay suficiente combustible para viajar a '%s'.\n", token);
-                    printf("¿Desea reabastecer combustible en '%s'? (s/n): ", galaxiaActual->nombre);
-                    char respuesta;
-                    scanf(" %c", &respuesta);
-                    if (respuesta == 's' || respuesta == 'S') {
-                        combustible = MAX_COMBUSTIBLE;
-                        printf("Combustible reabastecido en '%s'. Combustible actual: %d\n", galaxiaActual->nombre, combustible);
-                    } else {
-                        printf("Viaje cancelado.\n");
-                        return;
-                    }
-                } else {
-                    printf("No es posible reabastecer en la galaxia '%s'. Viaje cancelado.\n", galaxiaActual->nombre);
-                    return;
-                }
-            }
-
-            // Restar el peso al combustible
-            combustible -= peso;
-
-            // Actualizar la galaxia actual
-            galaxiaActual = galaxiaDestino;
-            printf("Viaje exitoso a la galaxia '%s'. Combustible restante: %d\n", token, combustible);
-
-            // Verificar si el combustible se ha agotado
-            if (combustible <= 0) {
-                printf("La nave se ha quedado sin combustible y ha quedado a la deriva. La tripulación ha muerto.\n");
-                exit(0); // Finalizar el programa
-            }
-        } else {
-            printf("La galaxia '%s' no es vecina de la galaxia actual '%s'. Viaje cancelado.\n", token, galaxiaActual->nombre);
-            return;
-        }
-        token = strtok(NULL, ",");
+void mostrar_galaxia_actual() {
+    if (ubicacion_nave != NULL) {
+        printf("La nave se encuentra en la galaxia: %s\n", ubicacion_nave);
+    } else {
+        printf("La nave no tiene una ubicación actual.\n");
     }
-    // Actualizar la ubicación de la nave
-    ubicacion_nave = strdup(galaxiaActual->nombre);
 }
 
-// Función principal para manejar el viaje guiado
-void viajeGuiado() {
-    char opcion[10];
-    Galaxia* galaxiaActual = buscarGalaxia(galaxias, ubicacion_nave);
-    if (galaxiaActual == NULL) {
-        printf("Error: La ubicación actual de la nave no es válida.\n");
-        return;
-    }
 
-    while (1) {
-        printf("\nUbicación actual: %s\n", galaxiaActual->nombre);
-        printf("Combustible restante: %d\n", combustible);
-        printf("Opciones:\n");
-        printf("1. Mostrar galaxias vecinas\n");
-        printf("2. Viajar a una galaxia vecina\n");
-        printf("3. Definir una secuencia de galaxias para viajar\n");
-        printf("4. Reabastecer combustible\n");
-        printf("5. Salir\n");
-        printf("Ingrese su opción: ");
-        scanf("%s", opcion);
-
-        if (strcmp(opcion, "1") == 0) {
-            int radio;
-            printf("Ingrese el radio (número entero positivo): ");
-            scanf("%d", &radio);
-            if (radio <= 0) {
-                printf("El radio debe ser un número entero positivo.\n");
-                continue;
-            }
-            mostrarGalaxiasVecinas(galaxiaActual, radio);
-        } else if (strcmp(opcion, "2") == 0) {
-            char destino[100];
-            printf("Ingrese el nombre de la galaxia vecina a la que desea viajar: ");
-            scanf("%s", destino);
-            Galaxia* galaxiaDestino = buscarGalaxia(galaxias, destino);
-            if (galaxiaDestino == NULL) {
-                printf("La galaxia '%s' no existe.\n", destino);
-                continue;
-            }
-            if (esVecina(galaxiaActual, destino)) {
-                // Obtener el peso de la arista
-                int peso = obtenerPesoArista(galaxiaActual, destino);
-
-                // Verificar si hay suficiente combustible
-                if (combustible < peso) {
-                    // Verificar si la galaxia actual es una estación de reabastecimiento
-                    if (esEstacionReabastecimiento(galaxiaActual->nombre)) {
-                        printf("No hay suficiente combustible para realizar el viaje.\n");
-                        printf("¿Desea reabastecer combustible en '%s'? (s/n): ", galaxiaActual->nombre);
-                        char respuesta;
-                        scanf(" %c", &respuesta);
-                        if (respuesta == 's' || respuesta == 'S') {
-                            combustible = MAX_COMBUSTIBLE;
-                            printf("Combustible reabastecido. Combustible actual: %d\n", combustible);
-                        } else {
-                            printf("Viaje cancelado.\n");
-                            continue;
-                        }
-                    } else {
-                        printf("No es posible reabastecer en la galaxia '%s'.\n", galaxiaActual->nombre);
-                        continue;
-                    }
-                }
-
-                // Restar el peso al combustible
-                combustible -= peso;
-
-                // Actualizar la galaxia actual
-                galaxiaActual = galaxiaDestino;
-                printf("Viaje exitoso a la galaxia '%s'. Combustible restante: %d\n", destino, combustible);
-
-                // Verificar si el combustible se ha agotado
-                if (combustible <= 0) {
-                    printf("La nave se ha quedado sin combustible y ha quedado a la deriva. La tripulación ha muerto.\n");
-                    exit(0); // Finalizar el programa
-                }
-            } else {
-                printf("La galaxia '%s' no es vecina de la galaxia actual '%s'.\n", destino, galaxiaActual->nombre);
-            }
-        } else if (strcmp(opcion, "3") == 0) {
-            secuenciaDeViaje(galaxiaActual);
-        } else if (strcmp(opcion, "4") == 0) {
-            // Verificar si la galaxia actual es una estación de reabastecimiento
-            if (esEstacionReabastecimiento(galaxiaActual->nombre)) {
-                // Reabastecer combustible en la galaxia actual
-                combustible = MAX_COMBUSTIBLE;
-                printf("Combustible reabastecido en '%s'. Combustible actual: %d\n", galaxiaActual->nombre, combustible);
-            } else {
-                printf("No es posible reabastecer en la galaxia '%s'.\n", galaxiaActual->nombre);
-            }
-        } else if (strcmp(opcion, "5") == 0) {
-            printf("Finalizando viaje guiado.\n");
-            break;
-        } else {
-            printf("Opción inválida.\n");
-        }
-    }
-
-    // Actualizar la ubicación de la nave al finalizar
-    ubicacion_nave = strdup(galaxiaActual->nombre);
-}
-
-// Función principal
-int main() {
-    // Cargar los datos desde el archivo generado
-    cargarDatos("../Parte1/salida.txt");
-
-    // Imprimir el estado de la nave
-    printf("La nave esta en %s con %d unidades de combustible.\n", ubicacion_nave, combustible);
-
-    // Preguntar al usuario el modo de viaje
-    printf("Seleccione el modo de viaje:\n");
-    printf("1. Autonomo\n");
-    printf("2. Guiado\n");
-    printf("Ingrese su opcion (1 o 2): ");
-    int opcion_modo;
-    scanf("%d", &opcion_modo);
-
-    if (opcion_modo == 1) {
-        modo_viaje = 0; // Autónomo
-    } else if (opcion_modo == 2) {
-        modo_viaje = 1; // Guiado
-    } else {
-        printf("Opción inválida. Se usará el modo autónomo por defecto.\n");
-        modo_viaje = 0;
-    }
-
-    if (modo_viaje == 0) {
-        // Modo autónomo
-        char destino[100];
-        printf("Ingrese el destino para la nave: ");
-        scanf("%s", destino);
-
-        // Preguntar al usuario qué algoritmo desea usar
-        int opcion;
-        printf("Seleccione el tipo de ruta a calcular:\n");
-        printf("1. Ruta que gasta menos combustible\n");
-        printf("2. Ruta con menor número de galaxias\n");
-        printf("Ingrese su opción (1 o 2): ");
-        scanf("%d", &opcion);
-
-        if (opcion == 1) {
-            dijkstraConCombustible(galaxias, ubicacion_nave, destino);
-        } else if (opcion == 2) {
-            shortestPathByGalaxies(galaxias, ubicacion_nave, destino);
-        } else {
-            printf("Opción inválida.\n");
-        }
-    } else {
-        // Modo guiado
-        viajeGuiado();
-    }
-
-    return 0;
+void mostrar_ayuda() {
+    printf("Comandos disponibles:\n");
+    printf("  viajar [galaxia]: Viaja a la galaxia especificada.\n");
+    printf("  viajar_secuencia [galaxia]: Define una secuencia de galaxias para viajar.\n");
+    printf("  mostrar_vecinas [radio]: Muestra las galaxias vecinas dentro del radio dado.\n");
+    printf("  combustible: Muestra el combustible restante de la nave.\n");
+    printf("  reabastecer: Reabastece combustible si la galaxia actual lo permite.\n");
+    printf("  ruta_optima [origen] [destino]: Calcula la ruta óptima entre dos galaxias.\n");
+    printf("  ruta_corta [origen] [destino]: Calcula la ruta con menos galaxias entre dos galaxias.\n");
+    printf("  help: Muestra esta lista de comandos.\n");
 }

@@ -1,7 +1,6 @@
 #ifndef GALAXIA_H
 #define GALAXIA_H
 
-// Definición de las estructuras
 typedef struct Arista {
     char* destino;
     int peso;
@@ -14,17 +13,15 @@ typedef struct Galaxia {
     struct Galaxia* siguiente;
 } Galaxia;
 
-// Variables globales declaradas como extern
 extern Galaxia* galaxias;  
 extern int combustible;    
-extern char* ubicacion_nave; 
-extern int modo_viaje; 
+extern char* ubicacion_nave;
+extern char* nombre_nave;  // Añadido para almacenar el nombre de la nave
 
-// Declaración de las funciones
 Galaxia* agregarGalaxia(Galaxia* lista, char* nombre);
 Galaxia* buscarGalaxia(Galaxia* lista, char* nombre);
 void agregarArista(Galaxia* galaxia, char* destino, int peso);
+void modificarPesoArista(Galaxia* origen, char* destino, int nuevoPeso);
 void guardarDatos(const char* nombreArchivo);
-void modificarPesoArista(Galaxia* galaxias);
 
 #endif 
