@@ -16,7 +16,7 @@ galaxia I2;
 arista A, A1 = peso = 3;
 arista A, A2 = peso = 1;
 arista A, A3 = peso = 2;
-arista A, B = peso = 1;
+arista A, B = peso = 18;
 arista A, D = peso = 7;
 arista A, E1 = peso = 25;
 arista B, C = peso = 21;
@@ -33,5 +33,3 @@ arista G, I = peso = 8;
 arista H, I = peso = 12;
 arista I, I1 = peso = 6;
 arista I, I2 = peso = 8;
-
-nave ASJDASJD, combustible = 155, I1, reabastecer;

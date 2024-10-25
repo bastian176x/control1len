@@ -1464,7 +1464,6 @@ void procesarEntradaInteractiva() {
         // Limpiar el buffer para la siguiente entrada
         yy_delete_buffer(bufferState);
 
-        // No llames a yyrestart(yyin);
     }
 }
 
@@ -1485,9 +1484,7 @@ int main(int argc, char **argv) {
     }
 
     // Modo interactivo
-    printf("Sistema listo para comandos interactivos.\n");
-    printf("Escriba 'modificar_arista <origen>, <destino> = peso = <nuevo_peso>;' para modificar una arista.\n");
-    printf("Escriba 'crear_nave <nombre_nave> <combustible> <galaxia>;' para crear una nave.\n");
+    printf("Sistema de navegacion.\n");
     printf("Escriba 'salir;' para terminar el programa.\n");
 
     // Procesar entrada interactiva
